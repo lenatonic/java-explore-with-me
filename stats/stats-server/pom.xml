@@ -87,6 +87,11 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jr</groupId>
+            <artifactId>jackson-jr-annotation-support</artifactId>
+            <version>2.15.1</version>
+        </dependency>
 
     </dependencies>
     <build>
