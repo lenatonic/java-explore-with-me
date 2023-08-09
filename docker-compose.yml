@@ -10,6 +10,7 @@ services:
       - stats-db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/postgres
+    restart: on-failure
 
   stats-db:
     image: postgres:14.8-alpine
