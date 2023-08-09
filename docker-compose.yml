@@ -27,6 +27,8 @@ services:
     container_name: ewm-service
     ports:
       - "8080:8080"
+    depends_on:
+      - ewm-db
 
   ewm-db:
     image: postgres:14.8-alpine
