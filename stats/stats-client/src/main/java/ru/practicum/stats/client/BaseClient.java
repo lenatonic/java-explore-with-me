@@ -1,4 +1,4 @@
-package ru.practicum.stats.client.baseClient;
+package ru.practicum.stats.client;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class BaseClient {
+abstract class BaseClient {
     protected final RestTemplate rest;
 
     protected ResponseEntity<Object> get(String path, Map<String, Object> parameters, List<String> uris, Boolean unique) {

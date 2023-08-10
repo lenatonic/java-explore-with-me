@@ -1,17 +1,19 @@
-package ru.practicum.mapper;
+package ru.practicum.stats.mapper;
 
-import ru.practicum.model.EndpointHit;
-import ru.practicum.model.ViewStats;
+import lombok.experimental.UtilityClass;
+import ru.practicum.stats.model.EndpointHit;
+import ru.practicum.stats.model.ViewStats;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.stats.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@UtilityClass
 public class StatsMapper {
     private static final DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public static EndpointHit toEndPointHit(EndpointHitDto endpointHitDto) {
+    public EndpointHit toEndPointHit(EndpointHitDto endpointHitDto) {
         EndpointHit endpointHit = EndpointHit.builder()
                 .id(endpointHitDto.getId())
                 .app(endpointHitDto.getApp())
@@ -22,7 +24,7 @@ public class StatsMapper {
         return endpointHit;
     }
 
-    public static ViewStatsDto toViewStatsDto(ViewStats viewStats) {
+    public ViewStatsDto toViewStatsDto(ViewStats viewStats) {
         ViewStatsDto viewStatsDto = ViewStatsDto.builder()
                 .app(viewStats.getApp())
                 .uri(viewStats.getUri())

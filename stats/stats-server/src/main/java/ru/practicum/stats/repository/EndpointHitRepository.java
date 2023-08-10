@@ -1,18 +1,18 @@
-package ru.practicum.repository;
+package ru.practicum.stats.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import ru.practicum.model.EndpointHit;
-import ru.practicum.model.ViewStats;
+import ru.practicum.stats.model.EndpointHit;
+import ru.practicum.stats.model.ViewStats;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> {
-    @Query(value = "SELECT new ru.practicum.model.ViewStats(" +
+    @Query(value = "SELECT new ru.practicum.stats.model.ViewStats(" +
             "eh.app as app, eh.uri as uri, COUNT(eh.ip) as hits) " +
             "FROM EndpointHit eh " +
             "WHERE eh.timestamp between :start AND :end " +
@@ -23,7 +23,7 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
                               @Param("end") LocalDateTime end,
                               @Param("uris") List<String> uris);
 
-    @Query(value = "SELECT new ru.practicum.model.ViewStats(" +
+    @Query(value = "SELECT new ru.practicum.stats.model.ViewStats(" +
             "eh.app as app, eh.uri as uri, COUNT(DISTINCT eh.ip) as hits) " +
             "FROM EndpointHit eh " +
             "WHERE eh.timestamp between :start AND :end " +
@@ -34,7 +34,7 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
                                       @Param("end") LocalDateTime end,
                                       @Param("uris") List<String> uris);
 
-    @Query(value = "SELECT new ru.practicum.model.ViewStats(" +
+    @Query(value = "SELECT new ru.practicum.stats.model.ViewStats(" +
             "eh.app as app, eh.uri as uri, COUNT(eh.ip) as hits) " +
             "FROM EndpointHit eh " +
             "WHERE eh.timestamp between :start AND :end " +

@@ -1,11 +1,10 @@
-package ru.practicum.stats.client.statsClient;
+package ru.practicum.stats.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.stats.client.baseClient.BaseClient;
 import ru.practicum.stats.dto.EndpointHitDto;
 
 import java.util.List;

@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -17,14 +18,17 @@ public class EndpointHitDto {
 
     @NotBlank
     @NotNull
+    @Size(min = 1, max = 255)
     private String app;
 
     @NotBlank
     @NotNull
+    @Size(min = 1, max = 255)
     private String uri;
 
     @NotBlank
     @NotNull
+    @Size(min = 1, max = 50)
     private String ip;
 
     private String timestamp;
