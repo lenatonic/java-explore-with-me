@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 public class StatsClient extends BaseClient {
-    private static final String APP = "ewm-main-service";
 
     public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(builder

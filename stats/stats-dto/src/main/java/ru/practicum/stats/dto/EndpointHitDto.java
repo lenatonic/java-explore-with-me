@@ -17,17 +17,14 @@ public class EndpointHitDto {
     private Long id;
 
     @NotBlank
-    @NotNull
     @Size(min = 1, max = 255)
     private String app;
 
     @NotBlank
-    @NotNull
     @Size(min = 1, max = 255)
     private String uri;
 
     @NotBlank
-    @NotNull
     @Size(min = 1, max = 50)
     private String ip;
 
