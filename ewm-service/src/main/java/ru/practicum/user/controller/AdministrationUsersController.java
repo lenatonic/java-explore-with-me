@@ -33,7 +33,7 @@ public class AdministrationUsersController {
 
     @GetMapping("/users")
     public List<UserDto> findUsers(@RequestParam(required = false) List<Long> ids,
-                                   @RequestParam (defaultValue = "0") int from,
+                                   @RequestParam(defaultValue = "0") int from,
                                    @RequestParam(defaultValue = "10") int size) {
         List<UserDto> ans = userService.findUsers(ids, from, size);
         log.debug("Админ получает ответ на запрос списка пользователей.");
@@ -44,5 +44,6 @@ public class AdministrationUsersController {
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+        log.debug("Админ удалил пользователя с id ={}", id);
     }
 }

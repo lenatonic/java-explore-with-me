@@ -1,19 +1,19 @@
-package ru.practicum.user.dto;
+package ru.practicum.category.dto;
 
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class UserShortDto {
-    @NotNull
+public class CategoryDto {
     private Long id;
 
     @NotBlank
+    @Size(min = 1, max = 50)
     private String name;
 }

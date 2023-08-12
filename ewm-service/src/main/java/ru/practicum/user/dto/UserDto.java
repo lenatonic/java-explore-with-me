@@ -17,11 +17,11 @@ public class UserDto {
     Long id;
 
     @NotBlank
-    @Size(min = 1, max = 55)
+    @Size(min = 6, max = 254)
     @Email
-    String email;
+    private String email;
 
     @NotBlank
-    @Size(min = 1, max = 100)
-    String name;
+    @Size(min = 2, max = 250)
+    private String name;
 }

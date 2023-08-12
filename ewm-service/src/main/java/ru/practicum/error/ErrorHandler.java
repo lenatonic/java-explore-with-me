@@ -1,8 +1,10 @@
 package ru.practicum.error;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.error.exceptions.NotFoundException;
@@ -19,6 +21,8 @@ import java.util.Collections;
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleMethodArgumentNotValidException(MethodArgumentNotValidException exception,
                                                           HttpStatus status) {
@@ -27,6 +31,7 @@ public class ErrorHandler {
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)));
     }
 
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleException(Exception exception, HttpStatus status) {
         log.error("error", exception);
@@ -37,6 +42,7 @@ public class ErrorHandler {
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)));
     }
 
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFoundException(NotFoundException e) {
         return ApiError.builder()
@@ -45,6 +51,18 @@ public class ErrorHandler {
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
                 .message(e.getMessage())
                 .status(HttpStatus.NOT_FOUND.getReasonPhrase().toUpperCase())
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        return ApiError.builder()
+                .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
+                .reason("conflict")
+                .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .message(e.getMessage())
+                .status(HttpStatus.CONFLICT.getReasonPhrase().toUpperCase())
                 .build();
     }
 
