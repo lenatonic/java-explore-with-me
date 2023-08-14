@@ -37,7 +37,7 @@ public class Event {
     private String description;
 
     @Column(name = "event_date")
-    private String eventDate;
+    private LocalDateTime eventDate;
 
     @ManyToOne
     @JoinColumn(name = "initiator_id")
@@ -49,6 +49,9 @@ public class Event {
 
     @Column(name = "paid")
     private boolean paid;
+
+    @Column(name = "participant_limit")
+    int participantLimit;
 
     @Column(name = "published_on")
     private LocalDateTime publishedOn;

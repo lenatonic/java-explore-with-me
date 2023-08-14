@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.error.exceptions.NotFoundException;
+import ru.practicum.error.exceptions.WrongEventDateException;
 import ru.practicum.util.Patterns;
 
 import java.io.PrintWriter;
@@ -57,6 +58,18 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        return ApiError.builder()
+                .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
+                .reason("conflict")
+                .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .message(e.getMessage())
+                .status(HttpStatus.CONFLICT.getReasonPhrase().toUpperCase())
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleWrongEventDateException(WrongEventDateException e) {
         return ApiError.builder()
                 .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
                 .reason("conflict")
