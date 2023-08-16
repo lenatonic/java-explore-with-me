@@ -2,11 +2,9 @@ package ru.practicum.event.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFoolDto;
+import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
 
@@ -33,7 +31,15 @@ public class AdministrationEventController {
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size) {
         List<EventFoolDto> ans = eventService.findEventsForAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
-        log.debug("Получение списка событий по параметрам поиска");
+        log.info("Получение списка событий по параметрам поиска");
+        return ans;
+    }
+
+    @PatchMapping("/events/{eventId}")
+    public EventFoolDto updateEventForAdmin(@PathVariable Long eventId,
+                                            @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+        EventFoolDto ans = eventService.updateEventForAdmin(eventId, updateEventAdminRequest);
+        log.info("Админ редактирует событие id ={}.", eventId);
         return ans;
     }
 }

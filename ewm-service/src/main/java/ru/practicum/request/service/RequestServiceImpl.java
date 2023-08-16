@@ -17,9 +17,10 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final EventRepository eventRepository;
@@ -50,21 +51,39 @@ public class RequestServiceImpl implements RequestService {
         if (event.getState() == EventState.PENDING) {
             throw new WrongEventDateException("Заявки не принимаются на ещё не опубликованное событие");
         }
+        Integer count = requestRepository.countAllByEvent_IdAndStatus(eventId, RequestStatus.CONFIRMED);
         if ((event.getParticipantLimit() != null ||
-                event.getParticipantLimit() != 0) &&
-                requestRepository.countDistinctByEventAndStatus(eventId, RequestStatus.CONFIRMED) >= event.getParticipantLimit()) {
+                event.getParticipantLimit() != 0) && count >= event.getParticipantLimit()) {
             throw new WrongEventDateException("Лимит заявок превышен. Приём заявок приостановлен");
         }
-        if (!event.isRequestModeration()) {
+        if (event.getRequestModeration()) {
             return RequestMapper.toParticipationRequestDto(requestRepository.save(ParticipationRequest.builder()
                     .created(LocalDateTime.now())
                     .event(event)
                     .requester(user)
-                    .status(RequestStatus.CONFIRMED).build()));
-        } else return RequestMapper.toParticipationRequestDto(requestRepository.save(ParticipationRequest.builder()
+                    .status(RequestStatus.PENDING).build()));
+        }
+        return RequestMapper.toParticipationRequestDto(requestRepository.save(ParticipationRequest.builder()
                 .created(LocalDateTime.now())
                 .event(event)
                 .requester(user)
-                .status(RequestStatus.PENDING).build()));
+                .status(RequestStatus.CONFIRMED).build()));
+    }
+
+    @Override
+    @Transactional
+    public ParticipationRequestDto canceledRequest(Long userId, Long requestId) {
+        ParticipationRequest ans = requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Запрос отсутствует или недоступен для редактирования."));
+        ans.setStatus(RequestStatus.CANCELED);
+        return RequestMapper.toParticipationRequestDto(requestRepository.save(ans));
+    }
+
+    @Override
+    @Transactional
+    public List<ParticipationRequestDto> findRequests(Long userId) {
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        return requestRepository.findByRequester_Id(userId).stream()
+                .map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList());
     }
 }

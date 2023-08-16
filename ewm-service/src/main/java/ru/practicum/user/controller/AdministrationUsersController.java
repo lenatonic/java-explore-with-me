@@ -27,7 +27,7 @@ public class AdministrationUsersController {
     @PostMapping("/users")
     public UserDto addUser(@RequestBody @Valid UserDto userDto) {
         UserDto addedUser = userService.addUser(userDto);
-        log.debug("Админ зарегестрировал нового пользователя: " + addedUser.toString());
+        log.info("Админ зарегестрировал нового пользователя: " + addedUser.toString());
         return addedUser;
     }
 
@@ -36,7 +36,7 @@ public class AdministrationUsersController {
                                    @RequestParam(defaultValue = "0") int from,
                                    @RequestParam(defaultValue = "10") int size) {
         List<UserDto> ans = userService.findUsers(ids, from, size);
-        log.debug("Админ получает ответ на запрос списка пользователей.");
+        log.info("Админ получает ответ на запрос списка пользователей.");
         return ans;
     }
 
@@ -44,6 +44,6 @@ public class AdministrationUsersController {
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        log.debug("Админ удалил пользователя с id ={}", id);
+        log.info("Админ удалил пользователя с id ={}", id);
     }
 }

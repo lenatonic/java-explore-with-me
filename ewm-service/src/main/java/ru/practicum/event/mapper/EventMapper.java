@@ -47,7 +47,7 @@ public class EventMapper {
                 .paid(event.isPaid())
                 .publishedOn(event.getPublishedOn() == null ? null : event.getPublishedOn()
                         .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .requestModeration(event.isRequestModeration())
+                .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .title(event.getTitle())
                 .views(event.getViews())
@@ -68,7 +68,7 @@ public class EventMapper {
                 .participantLimit(event.getParticipantLimit())
                 .location(event.getLocation())
                 .paid(event.isPaid())
-                .requestModeration(event.isRequestModeration())
+                .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .title(event.getTitle())
                 .views(event.getViews())
@@ -105,7 +105,7 @@ public class EventMapper {
                 .participantLimit(event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn() == null ? null : event.getPublishedOn()
                         .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .requestModeration(event.isRequestModeration())
+                .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .title(event.getTitle())
                 .views(event.getViews())
@@ -122,7 +122,7 @@ public class EventMapper {
                 .location(updateEventUserRequest.getLocation())
                 .paid(updateEventUserRequest.isPaid())
                 .participantLimit(updateEventUserRequest.getParticipantLimit())
-                .requestModeration(updateEventUserRequest.isRequestModeration())
+                .requestModeration(updateEventUserRequest.getRequestModeration())
                 .state(updateEventUserRequest.getStateAction()
                         .equals("CANCEL_REVIEW") ? EventState.CANCELED : EventState.PENDING)
                 .title(updateEventUserRequest.getTitle())
@@ -138,23 +138,23 @@ public class EventMapper {
                 .confirmedRequests(event.getConfirmedRequests())
                 .createdOn(event.getCreatedOn())
                 .description(updateEventUserRequest.getDescription() != null ? updateEventUserRequest.getDescription() : event.getDescription())
-                .eventDate(updateEventUserRequest.getEventDate() !=null ? LocalDateTime.parse(updateEventUserRequest.getEventDate(),
+                .eventDate(updateEventUserRequest.getEventDate() != null ? LocalDateTime.parse(updateEventUserRequest.getEventDate(),
                         DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)) : event.getEventDate())
                 .initiator(event.getInitiator())
                 .location(updateEventUserRequest.getLocation() != null ? updateEventUserRequest.getLocation() : event.getLocation())
                 .paid(event.isPaid())
-                .participantLimit(updateEventUserRequest.getParticipantLimit() !=0 ? updateEventUserRequest.getParticipantLimit() : event.getParticipantLimit())
+                .participantLimit(updateEventUserRequest.getParticipantLimit() != 0 ? updateEventUserRequest.getParticipantLimit() : event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn())
                 .state(updateEventUserRequest.getStateAction()
                         .equals("CANCEL_REVIEW") ? EventState.CANCELED : EventState.PENDING)
-                .requestModeration(updateEventUserRequest.isRequestModeration())
+                .requestModeration(updateEventUserRequest.getRequestModeration() == null ? event.getRequestModeration() : updateEventUserRequest.getRequestModeration())
                 .title(updateEventUserRequest.getTitle() != null ? updateEventUserRequest.getTitle() : event.getTitle())
                 .views(event.getViews())
                 .build();
 
     }
 
-    public Event toUpdatedEvent(UpdateEventAdminRequest updateEventAdminRequest, Event event) {
+    public Event toUpdatedEventForAdmin(UpdateEventAdminRequest updateEventAdminRequest, Event event) {
         return Event.builder()
                 .id(event.getId())
                 .annotation(updateEventAdminRequest.getAnnotation() != null ? updateEventAdminRequest.getAnnotation() : event.getAnnotation())
@@ -163,19 +163,18 @@ public class EventMapper {
                 .confirmedRequests(event.getConfirmedRequests())
                 .createdOn(event.getCreatedOn())
                 .description(updateEventAdminRequest.getDescription() != null ? updateEventAdminRequest.getDescription() : event.getDescription())
-                .eventDate(updateEventAdminRequest.getEventDate() !=null ? LocalDateTime.parse(updateEventAdminRequest.getEventDate(),
+                .eventDate(updateEventAdminRequest.getEventDate() != null ? LocalDateTime.parse(updateEventAdminRequest.getEventDate(),
                         DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)) : event.getEventDate())
                 .initiator(event.getInitiator())
-                .location(updateEventAdminRequest.getLocation() != null ? updateEventAdminRequest.getLocation() : event.getLocation())
-                .paid(event.isPaid())
-                .participantLimit(updateEventAdminRequest.getParticipantLimit() !=0 ? updateEventAdminRequest.getParticipantLimit() : event.getParticipantLimit())
+                .location(updateEventAdminRequest.getLocation() == null ? event.getLocation() : updateEventAdminRequest.getLocation())
+                .paid(updateEventAdminRequest.getPaid() == null ? event.isPaid() : updateEventAdminRequest.getPaid())
+                .participantLimit(updateEventAdminRequest.getParticipantLimit() != 0 ? updateEventAdminRequest.getParticipantLimit() : event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn())
                 .state(updateEventAdminRequest.getStateAction()
-                        .equals("PUBLISH_EVENT") ? EventState.PUBLISHED : EventState.CANCELED)
-                .requestModeration(updateEventAdminRequest.isRequestModeration())
+                        .equals("PUBLISH_EVENT") ? EventState.CANCELED : EventState.PUBLISHED)
+                .requestModeration(updateEventAdminRequest.getRequestModeration() == null ? event.getRequestModeration() : updateEventAdminRequest.getRequestModeration())
                 .title(updateEventAdminRequest.getTitle() != null ? updateEventAdminRequest.getTitle() : event.getTitle())
                 .views(event.getViews())
                 .build();
-
     }
 }

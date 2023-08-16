@@ -10,10 +10,7 @@ import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.error.exceptions.NotFoundException;
 import ru.practicum.error.exceptions.WrongEventDateException;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.EventFoolDto;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.UpdateEventUserRequest;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
@@ -32,7 +29,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final LocationRepository locationRepository;
@@ -62,7 +58,12 @@ public class EventServiceImpl implements EventService {
             throw new WrongEventDateException("The date of Event is scheduled cannot be earlier" +
                     "than two hours from the current moment");
         }
+        if(newEventDto.getRequestModeration() == null) {
+            newEventDto.setRequestModeration(true);
+        }
+        System.out.println(newEventDto.getRequestModeration());
         Event event = EventMapper.toEvent(newEventDto);
+        System.out.println(event.getRequestModeration());
         event.setInitiator(User.builder().id(id).build());
         Location location = locationRepository.save(newEventDto.getLocation());
         event.setLocation(location);
@@ -80,6 +81,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public List<EventShortDto> findEvents(Long id, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
         List<EventShortDto> ans = new ArrayList<>();
@@ -89,6 +91,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFoolDto findEvent(Long idUser, Long idEvent) {
         Event event = eventRepository.findEventByIdAndInitiator_Id(idEvent, idUser);
         EventFoolDto ans = EventMapper.toEventFoolDtoForUser(event);
@@ -99,36 +102,42 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFoolDto updateEvent(Long idUser, Long idEvent, UpdateEventUserRequest updateEventUserRequest) {
         Event event = eventRepository.findEventByIdAndInitiator_Id(idEvent, idUser);
+        if (updateEventUserRequest.getLocation() != null) {
+            updateEventUserRequest.setLocation(locationRepository.save(updateEventUserRequest.getLocation()));
+        }
         Event updatedEvent = EventMapper.toUpdatedEvent(updateEventUserRequest, event);
+        if (updatedEvent.getLocation() == null) {
+            updatedEvent.setLocation(locationRepository.save(updateEventUserRequest.getLocation()));
+        }
         return EventMapper.toEventFoolDtoForUser(eventRepository.save(updatedEvent));
     }
 
+    @Transactional
     @Override
     public List<EventFoolDto> findEventsForAdmin(List<Long> users, List<EventState> states, List<Long> categories,
-                                          String rangeStart, String rangeEnd, int from, int size) {
+                                                 String rangeStart, String rangeEnd, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
+
         LocalDateTime start = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN));
         LocalDateTime end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN));
-//        if (categories.size() == 1 && categories.contains(0)) {
-//        categories = null;
-//        }
-//
-//        if (users.size() == 1 && users.contains(0L)) {
-//            users = null;
-//        }
-//        if (states.size() == 1 && states.contains(0L)) {
-//            states = null;
-//        }
 
-//        if(users == null && categories == null) {
-//            return eventRepository.findByStateInAndEventDateIsBetween(states, start, end, pageable).stream().map(EventMapper::toEventFoolDto).collect(Collectors.toList());
-//        }
+        return eventRepository.findByInitiator_IdInAndStateInAndCategory_IdInAndEventDateIsAfterAndEventDateIsBefore(users,
+                        states, categories, start, end, pageable).getContent()
+                .stream().map(EventMapper::toEventFoolDtoForUser).collect(Collectors.toList());
+    }
 
-//        if(users == null) {
-//            return eventRepository.findByStateInAndCategory_IdInAndEventDateIsBetween(states, categories, start, end, pageable).stream().map(EventMapper::toEventFoolDto).collect(Collectors.toList());
-//        }
-//        return eventRepository.findEventWhereInitiator_IdInAndStateInAndCategory_IdInAndEventDateIsBetween(users, states, categories, start, end, pageable).getContent();
-    List<Event> events = eventRepository.searchEventsByAdmin(users, states, categories, start, end, pageable);
-    return events.stream().map(EventMapper::toEventFoolDtoForUser).collect(Collectors.toList());
+    @Transactional
+    @Override
+    public EventFoolDto updateEventForAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Такого события не существует"));
+
+        Event upEvent = EventMapper.toUpdatedEventForAdmin(updateEventAdminRequest, event);
+
+        if (upEvent.getState().equals(EventState.PUBLISHED)) {
+            upEvent.setPublishedOn(LocalDateTime.now());
+        }
+        EventFoolDto ans = EventMapper.toEventFoolDtoForUser(eventRepository.save(upEvent));
+        return ans;
     }
 }

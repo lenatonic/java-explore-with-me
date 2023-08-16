@@ -24,14 +24,14 @@ public class CategoryController {
     public List<CategoryDto> findCategories(@RequestParam(defaultValue = "0") int from,
                                             @RequestParam(defaultValue = "10") int size) {
         List<CategoryDto> ans = categoryService.findCategories(from, size);
-        log.debug("Получен список категорий");
+        log.info("Получен список категорий");
         return ans;
     }
 
     @GetMapping("/{catId}")
     public CategoryDto findCategoryById(@PathVariable Long catId) {
         CategoryDto ans = categoryService.findCategoryById(catId);
-        log.debug("Обработан запрос на получение категории с id = {}.", catId);
+        log.info("Обработан запрос на получение категории с id = {}.", catId);
         return ans;
     }
 }

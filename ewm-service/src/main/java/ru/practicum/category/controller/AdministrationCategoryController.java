@@ -25,7 +25,7 @@ public class AdministrationCategoryController {
     @PostMapping("/categories")
     public CategoryDto addCategory(@Valid @RequestBody CategoryDto categoryDto) {
         CategoryDto ans = categoryService.addCategory(categoryDto);
-        log.debug("Админ добавил категорию {}", categoryDto.getName());
+        log.info ("Админ добавил категорию {}", categoryDto.getName());
         return ans;
     }
 
@@ -33,7 +33,7 @@ public class AdministrationCategoryController {
     public CategoryDto patchCategory(@RequestBody @Valid CategoryDto categoryDto,
                                      @PathVariable Long catId) {
         CategoryDto ans = categoryService.patchCategory(catId, categoryDto);
-        log.debug("Админ изменил категорию с id = {} на {}.", catId, categoryDto.getName());
+        log.info("Админ изменил категорию с id = {} на {}.", catId, categoryDto.getName());
         return ans;
     }
 
@@ -41,6 +41,6 @@ public class AdministrationCategoryController {
     @DeleteMapping("/categories/{catId}")
     public void deleteCategory(@PathVariable Long catId) {
         categoryService.deleteCategory(catId);
-        log.debug("Админ удаляет категорию с id = {}.", catId);
+        log.info("Админ удаляет категорию с id = {}.", catId);
     }
 }

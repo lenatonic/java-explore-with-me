@@ -29,7 +29,7 @@ public class UpdateEventUserRequest {
 
     private int participantLimit;
 
-    private boolean requestModeration;
+    private Boolean requestModeration;
 
     private StateActionForUser stateAction;
 

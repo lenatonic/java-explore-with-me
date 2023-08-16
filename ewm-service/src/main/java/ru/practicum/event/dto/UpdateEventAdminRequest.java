@@ -23,11 +23,11 @@ public class UpdateEventAdminRequest {
 
     private Location location;
 
-    private boolean paid;
+    private Boolean paid;
 
     private int participantLimit;
 
-    private boolean requestModeration;
+    private Boolean requestModeration;
 
     private StateActionForAdmin stateAction;
 
