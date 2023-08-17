@@ -41,7 +41,7 @@ public class RequestController {
     @GetMapping
     public List<ParticipationRequestDto> findRequests(@PathVariable("userId") Long userId) {
         List<ParticipationRequestDto> ans = requestService.findRequests(userId);
-        log.info("Получения списка запросов пользователя id = {}.", userId);
+        log.info("Получение списка запросов пользователя id = {}.", userId);
         return ans;
     }
 }

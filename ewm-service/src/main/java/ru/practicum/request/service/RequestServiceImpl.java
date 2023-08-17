@@ -1,6 +1,7 @@
 package ru.practicum.request.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.error.exceptions.NotFoundException;
@@ -8,6 +9,8 @@ import ru.practicum.error.exceptions.WrongEventDateException;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
+import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.ParticipationRequest;
@@ -17,10 +20,12 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final EventRepository eventRepository;
@@ -45,15 +50,17 @@ public class RequestServiceImpl implements RequestService {
         }
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Такого события не существует"));
-        if (event.getInitiator().getId() == userId) {
+        if (event.getInitiator().getId().equals(userId)) {
             throw new WrongEventDateException("Вы не можете подать заявку в событии, которое организовали");
         }
-        if (event.getState() == EventState.PENDING) {
+        if (event.getState().equals(EventState.PENDING)) {
             throw new WrongEventDateException("Заявки не принимаются на ещё не опубликованное событие");
         }
-        Integer count = requestRepository.countAllByEvent_IdAndStatus(eventId, RequestStatus.CONFIRMED);
-        if ((event.getParticipantLimit() != null ||
-                event.getParticipantLimit() != 0) && count >= event.getParticipantLimit()) {
+        List<ParticipationRequest> allRequests = requestRepository.findByEvent_IdAndStatus(eventId,
+                RequestStatus.CONFIRMED);
+        int count = allRequests.size();
+        if (!event.getParticipantLimit().equals(0) && count >= event.getParticipantLimit() ||
+                event.getParticipantLimit() != null && count >= event.getParticipantLimit()) {
             throw new WrongEventDateException("Лимит заявок превышен. Приём заявок приостановлен");
         }
         if (event.getRequestModeration()) {
@@ -85,5 +92,66 @@ public class RequestServiceImpl implements RequestService {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         return requestRepository.findByRequester_Id(userId).stream()
                 .map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ParticipationRequestDto> findRequestsByUsersEvent(Long idEvent, Long idUser) {
+        userRepository.findById(idUser).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        eventRepository.findById(idEvent).orElseThrow(() -> new NotFoundException("Такого события не существует"));
+        return requestRepository.findByEvent_Id(idEvent).stream()
+                .map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public EventRequestStatusUpdateResult updateStatusRequests(Long idUser, Long idEvent,
+                                                               EventRequestStatusUpdateRequest statusUpdateRequest) {
+        userRepository.findById(idUser).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        Event event = eventRepository.findById(idEvent).orElseThrow(() -> new NotFoundException("Такого события не существует"));
+        if (event.getRequestModeration() == null || event.getRequestModeration().equals(false) || event.getParticipantLimit().equals(0)) {
+            return EventRequestStatusUpdateResult.builder()
+                    .confirmedRequests(requestRepository.findByIdIn(statusUpdateRequest.getRequestIds())
+                            .stream().map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
+                    .rejectedRequests(new ArrayList<>()).build();
+        }
+        List<ParticipationRequest> allRequests = requestRepository.findByEvent_IdAndStatus(idEvent,
+                RequestStatus.CONFIRMED);
+        int limit = allRequests.size();
+
+        if (event.getParticipantLimit() <= limit) {
+            throw new DataIntegrityViolationException("Достигнут лимит заявок. Заявки не принимаются");
+        }
+
+        List<ParticipationRequest> confirmedRequestsForAns = new ArrayList<>();
+        List<ParticipationRequest> rejectedRequestsForAns = new ArrayList<>();
+
+        List<ParticipationRequest> confirmedRequestsForUp = new ArrayList<>();
+        List<ParticipationRequest> rejectedRequestsForUp = new ArrayList<>();
+
+        List<ParticipationRequest> requestsForChange = requestRepository.findByIdIn(statusUpdateRequest.getRequestIds());
+        System.out.println(requestsForChange.get(0).getStatus());
+        for (ParticipationRequest request : requestsForChange) {
+            if (event.getParticipantLimit() > limit) {
+                confirmedRequestsForAns.add(request);
+                request.setStatus(RequestStatus.CONFIRMED);
+                confirmedRequestsForUp.add(request);
+                limit++;
+            } else {
+                rejectedRequestsForAns.add(request);
+                request.setStatus(RequestStatus.REJECTED);
+                rejectedRequestsForUp.add(request);
+            }
+        }
+        requestRepository.saveAll(confirmedRequestsForUp);
+        requestRepository.saveAll(rejectedRequestsForUp);
+        EventRequestStatusUpdateResult.builder()
+                .confirmedRequests(confirmedRequestsForUp.stream().
+                        map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
+                .rejectedRequests(rejectedRequestsForUp.stream()
+                        .map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList())).build();
+
+        return EventRequestStatusUpdateResult.builder()
+                .confirmedRequests(confirmedRequestsForAns.stream().map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
+                .rejectedRequests(rejectedRequestsForAns.stream().map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList())).build();
     }
 }
