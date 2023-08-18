@@ -25,7 +25,7 @@ public class UpdateEventUserRequest {
 
     private Location location;
 
-    private boolean paid;
+    private Boolean paid;
 
     private int participantLimit;
 

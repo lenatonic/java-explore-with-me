@@ -43,7 +43,7 @@ public class Event {
     @JoinColumn(name = "initiator_id")
     private User initiator;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Location location;
 
@@ -67,5 +67,5 @@ public class Event {
     private String title;
 
     @Column(name = "views")
-    private int views;
+    private Long views;
 }

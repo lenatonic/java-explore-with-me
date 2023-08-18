@@ -3,6 +3,7 @@ package ru.practicum.event.service;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.model.EventState;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface EventService {
@@ -18,4 +19,10 @@ public interface EventService {
                                           String rangeStart, String rangeEnd, int from, int size);
 
     EventFoolDto updateEventForAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
+
+    List<EventShortDto> findEventsForPublic(String text, List<Long> categories, Boolean paid,
+                                            String rangeStart, String rangeEnd, Boolean onlyAvailable,
+                                            EventsSort sort, Integer from, Integer size, HttpServletRequest request);
+
+    EventFoolDto findEventForPublic(Long id, HttpServletRequest request);
 }

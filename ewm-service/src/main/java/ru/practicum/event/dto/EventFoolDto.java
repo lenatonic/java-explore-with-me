@@ -50,5 +50,5 @@ public class EventFoolDto {
     @NotBlank
     private String title;
 
-    private int views;
+    private Long views;
 }

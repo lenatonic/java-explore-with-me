@@ -4,10 +4,11 @@ import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface RequestService {
-    ParticipationRequestDto createRequest(Long userId, Long eventId);
+    ParticipationRequestDto createRequest(Long userId, Long eventId, LocalDateTime time);
 
     ParticipationRequestDto canceledRequest(Long userId, Long requestId);
 

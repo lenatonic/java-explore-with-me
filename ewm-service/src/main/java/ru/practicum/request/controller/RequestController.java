@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.service.RequestService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -25,7 +26,7 @@ public class RequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto createRequest(@PathVariable("userId") Long userId,
                                                  @RequestParam("eventId") Long eventId) {
-        ParticipationRequestDto ans = requestService.createRequest(userId, eventId);
+        ParticipationRequestDto ans = requestService.createRequest(userId, eventId, LocalDateTime.now());
         log.info("Пользователь с id {}, создаёт запрос на участие в событии id {}.", userId, eventId);
         return ans;
     }

@@ -12,6 +12,7 @@ import ru.practicum.event.repository.EventRepository;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.request.dto.RequestUpdateStatus;
 import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.ParticipationRequest;
 import ru.practicum.request.model.RequestStatus;
@@ -42,7 +43,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Transactional
     @Override
-    public ParticipationRequestDto createRequest(Long userId, Long eventId) {
+    public ParticipationRequestDto createRequest(Long userId, Long eventId, LocalDateTime time) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователя с таким id не существует"));
         if (requestRepository.existsByRequester_IdAndEvent_Id(userId, eventId)) {
@@ -65,13 +66,15 @@ public class RequestServiceImpl implements RequestService {
         }
         if (event.getRequestModeration()) {
             return RequestMapper.toParticipationRequestDto(requestRepository.save(ParticipationRequest.builder()
-                    .created(LocalDateTime.now())
+//                    .created(LocalDateTime.now())
+                            .created(time)
                     .event(event)
                     .requester(user)
                     .status(RequestStatus.PENDING).build()));
         }
         return RequestMapper.toParticipationRequestDto(requestRepository.save(ParticipationRequest.builder()
-                .created(LocalDateTime.now())
+//                .created(LocalDateTime.now())
+                        .created(time)
                 .event(event)
                 .requester(user)
                 .status(RequestStatus.CONFIRMED).build()));
@@ -95,6 +98,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public List<ParticipationRequestDto> findRequestsByUsersEvent(Long idEvent, Long idUser) {
         userRepository.findById(idUser).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         eventRepository.findById(idEvent).orElseThrow(() -> new NotFoundException("Такого события не существует"));
@@ -108,19 +112,7 @@ public class RequestServiceImpl implements RequestService {
                                                                EventRequestStatusUpdateRequest statusUpdateRequest) {
         userRepository.findById(idUser).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Event event = eventRepository.findById(idEvent).orElseThrow(() -> new NotFoundException("Такого события не существует"));
-        if (event.getRequestModeration() == null || event.getRequestModeration().equals(false) || event.getParticipantLimit().equals(0)) {
-            return EventRequestStatusUpdateResult.builder()
-                    .confirmedRequests(requestRepository.findByIdIn(statusUpdateRequest.getRequestIds())
-                            .stream().map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
-                    .rejectedRequests(new ArrayList<>()).build();
-        }
-        List<ParticipationRequest> allRequests = requestRepository.findByEvent_IdAndStatus(idEvent,
-                RequestStatus.CONFIRMED);
-        int limit = allRequests.size();
-
-        if (event.getParticipantLimit() <= limit) {
-            throw new DataIntegrityViolationException("Достигнут лимит заявок. Заявки не принимаются");
-        }
+        List<ParticipationRequest> requestsForChange = requestRepository.findByIdIn(statusUpdateRequest.getRequestIds());
 
         List<ParticipationRequest> confirmedRequestsForAns = new ArrayList<>();
         List<ParticipationRequest> rejectedRequestsForAns = new ArrayList<>();
@@ -128,22 +120,39 @@ public class RequestServiceImpl implements RequestService {
         List<ParticipationRequest> confirmedRequestsForUp = new ArrayList<>();
         List<ParticipationRequest> rejectedRequestsForUp = new ArrayList<>();
 
-        List<ParticipationRequest> requestsForChange = requestRepository.findByIdIn(statusUpdateRequest.getRequestIds());
-        System.out.println(requestsForChange.get(0).getStatus());
-        for (ParticipationRequest request : requestsForChange) {
-            if (event.getParticipantLimit() > limit) {
-                confirmedRequestsForAns.add(request);
-                request.setStatus(RequestStatus.CONFIRMED);
-                confirmedRequestsForUp.add(request);
-                limit++;
-            } else {
+        if (statusUpdateRequest.getStatus().equals(RequestUpdateStatus.REJECTED)) {
+            for (ParticipationRequest request : requestsForChange) {
                 rejectedRequestsForAns.add(request);
                 request.setStatus(RequestStatus.REJECTED);
                 rejectedRequestsForUp.add(request);
             }
+        } else {
+            if (event.getRequestModeration() == null || event.getRequestModeration().equals(false) || event.getParticipantLimit().equals(0)) {
+                return EventRequestStatusUpdateResult.builder()
+                        .confirmedRequests(requestRepository.findByIdIn(statusUpdateRequest.getRequestIds())
+                                .stream().map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
+                        .rejectedRequests(new ArrayList<>()).build();
+            }
+            if (event.getParticipantLimit() <= event.getConfirmedRequests()) {
+                throw new DataIntegrityViolationException("Достигнут лимит заявок. Заявки не принимаются");
+            }
+            System.out.println(requestsForChange.get(0).getStatus());
+            for (ParticipationRequest request : requestsForChange) {
+                if (event.getParticipantLimit() > event.getConfirmedRequests()) {
+                    confirmedRequestsForAns.add(request);
+                    request.setStatus(RequestStatus.CONFIRMED);
+                    confirmedRequestsForUp.add(request);
+                    event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+                } else {
+                    rejectedRequestsForAns.add(request);
+                    request.setStatus(RequestStatus.REJECTED);
+                    rejectedRequestsForUp.add(request);
+                }
+            }
         }
         requestRepository.saveAll(confirmedRequestsForUp);
         requestRepository.saveAll(rejectedRequestsForUp);
+        eventRepository.save(event);
         EventRequestStatusUpdateResult.builder()
                 .confirmedRequests(confirmedRequestsForUp.stream().
                         map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
