@@ -1,7 +1,6 @@
 package ru.practicum.event.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +13,7 @@ import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.error.exceptions.NotFoundException;
+import ru.practicum.error.exceptions.NotValidException;
 import ru.practicum.error.exceptions.WrongEventDateException;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
@@ -35,7 +35,6 @@ import ru.practicum.util.Patterns;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,9 +65,7 @@ public class EventServiceImpl implements EventService {
         if (newEventDto.getRequestModeration() == null) {
             newEventDto.setRequestModeration(true);
         }
-        System.out.println(newEventDto.getRequestModeration());
         Event event = EventMapper.toEvent(newEventDto);
-        System.out.println(event.getRequestModeration());
         event.setInitiator(User.builder().id(id).build());
         Location location = locationRepository.save(newEventDto.getLocation());
         event.setLocation(location);
@@ -115,9 +112,9 @@ public class EventServiceImpl implements EventService {
         }
 
         if (updateEventUserRequest.getStateAction() != null) {
-            if ("SEND_TO_REVIEW".equals(updateEventUserRequest.getStateAction()))
+            if (updateEventUserRequest.getStateAction().equals(StateActionForUser.SEND_TO_REVIEW)) {
                 event.setState(EventState.PENDING);
-            else
+            } else
                 event.setState(EventState.CANCELED);
         }
         Event updatedEvent = EventMapper.toUpdatedEvent(updateEventUserRequest, event);
@@ -146,7 +143,13 @@ public class EventServiceImpl implements EventService {
     public EventFoolDto updateEventForAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Такого события не существует"));
-
+        if(updateEventAdminRequest.getStateAction() == null) {
+            event.setState(event.getState());
+        } else if(updateEventAdminRequest.getStateAction().equals(StateActionForAdmin.PUBLISH_EVENT)) {
+            event.setState(EventState.PUBLISHED);
+        } else if(updateEventAdminRequest.getStateAction().equals(StateActionForAdmin.REJECT_EVENT)) {
+            event.setState(EventState.CANCELED);
+        }
         Event upEvent = EventMapper.toUpdatedEventForAdmin(updateEventAdminRequest, event);
 
         if (upEvent.getState().equals(EventState.PUBLISHED)) {
@@ -157,32 +160,42 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public List<EventShortDto> findEventsForPublic(String text, List<Long> categories, Boolean paid,
                                                    String rangeStart, String rangeEnd, Boolean onlyAvailable,
                                                    EventsSort sort, Integer from, Integer size, HttpServletRequest request) {
-        LocalDateTime start = LocalDateTime.parse(rangeStart, ofPattern(Patterns.DATE_PATTERN));
-        LocalDateTime end = LocalDateTime.parse(rangeEnd, ofPattern(Patterns.DATE_PATTERN));
 
-        String filter;
-        if (sort.equals(EventsSort.EVENT_DATE.toString())) {
-            filter = "eventDate";
-        }
-        else if (sort.equals(EventsSort.VIEWS.toString())) {
-            filter = "views";
-        } else {
+        LocalDateTime start = rangeStart == null ? LocalDateTime.now() : LocalDateTime.
+                parse(rangeStart, ofPattern(Patterns.DATE_PATTERN));
+        LocalDateTime end = rangeEnd == null ? LocalDateTime.now().plusYears(1) : LocalDateTime
+                .parse(rangeEnd, ofPattern(Patterns.DATE_PATTERN));
+
+//        if (start.isAfter(LocalDateTime.now()) || end.isAfter(LocalDateTime.now())) {
+//            throw new NotValidException("Временные рамки заданы не корректно");
+//        }
+
+        String filter = null;
+        if (sort == null) {
             filter = "id";
+        } else if (sort.equals(EventsSort.EVENT_DATE.toString())) {
+            filter = "eventDate";
+        } else if (sort.equals(EventsSort.VIEWS.toString())) {
+            filter = "views";
         }
-        if (start == null) {
-            start = LocalDateTime.now();
-        }
-        if (end == null) {
-            end = LocalDateTime.now().plusYears(1);
-        }
+//         else {
+//            filter = "id";
+//        }
+//        if (start == null) {
+//            start = LocalDateTime.now();
+//        }
+//        if (end == null) {
+//            end = LocalDateTime.now().plusYears(1);
+//        }
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(filter));
 
         List<Event> events = eventRepository.getFilterEvents(text, categories, paid, start, end, pageable);
         if (onlyAvailable) {
-            events.removeIf(event -> requestRepository.findByEvent_IdAndStatus(event.getId(), RequestStatus.CONFIRMED).size() == event.getParticipantLimit());
+            events.removeIf(event -> requestRepository.findAllByEvent_IdAndStatus(event.getId(), RequestStatus.CONFIRMED).size() == event.getParticipantLimit());
         }
         //eventRepository.saveAll(events);
         addHits(events, request);
@@ -190,16 +203,21 @@ public class EventServiceImpl implements EventService {
         return events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
     }
 
+    @Transactional
+    @Override
     public EventFoolDto findEventForPublic(@PathVariable Long id, HttpServletRequest request) {
         LocalDateTime time = LocalDateTime.now();
         Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException(""));
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new NotFoundException("Данное событие не найдено.");
+        }
         EndpointHitDto endpointHitDto = EndpointHitDto.builder()
                 .app("main-service")
-                .uri("/events/" +id)
+                .uri("/events/" + id)
                 .ip(request.getRemoteAddr())
                 .timestamp(time.format(ofPattern(Patterns.DATE_PATTERN))).build();
         statsClient.addHit(endpointHitDto);
-        addView(event);
+        //addView(event);
         return EventMapper.toEventFoolDtoForUser(event);
     }
 
@@ -214,8 +232,8 @@ public class EventServiceImpl implements EventService {
         addHitsForEventsList(events, endpointHitDto);
     }
 
-    private void addHitsForEventsList(List<Event> events,EndpointHitDto endpointHitDto) {
-        for(Event event : events) {
+    private void addHitsForEventsList(List<Event> events, EndpointHitDto endpointHitDto) {
+        for (Event event : events) {
             EndpointHitDto endpoint = EndpointHitDto.builder()
                     .ip(endpointHitDto.getIp())
                     .uri(endpointHitDto.getUri() + event.getId())

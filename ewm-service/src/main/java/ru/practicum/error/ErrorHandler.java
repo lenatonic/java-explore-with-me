@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.error.exceptions.NotFoundException;
+import ru.practicum.error.exceptions.NotValidException;
 import ru.practicum.error.exceptions.WrongEventDateException;
 import ru.practicum.util.Patterns;
 
@@ -25,11 +26,15 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleMethodArgumentNotValidException(MethodArgumentNotValidException exception,
-                                                          HttpStatus status) {
-        log.info("400{}", exception.getMessage());
-        return new ApiError(status, "Incorrectly made request", exception.getMessage(), Collections.emptyList(),
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)));
+    public ApiError handleNotValidException(NotValidException e) {
+        log.info("400{}", e.getMessage());
+        return ApiError.builder()
+                .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
+                .reason("Not found")
+                .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .message(e.getMessage())
+                .status(HttpStatus.NOT_FOUND.getReasonPhrase().toUpperCase())
+                .build();
     }
 
     @ExceptionHandler

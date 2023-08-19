@@ -2,7 +2,6 @@ package ru.practicum.compilation.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
@@ -41,7 +40,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto updateCompilation(Long compId, UpdateCompilationDto updateCompilationDto) {
         Compilation compilation = compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("Нет данных подборки событий с id = " + compId +"."));
+                .orElseThrow(() -> new NotFoundException("Нет данных подборки событий с id = " + compId + "."));
 
         List<Event> events = updateCompilationDto.getEvents() == null ?
                 new ArrayList<>() : eventRepository.findAllById(updateCompilationDto.getEvents());
@@ -52,7 +51,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public List<CompilationDto> findCompilations(int from, int size) {
-        return compilationRepository.findAll(PageRequest.of(from/size, size))
+        return compilationRepository.findAll(PageRequest.of(from / size, size))
                 .stream().map(CompilationMapper::toCompilationDto).collect(Collectors.toList());
     }
 

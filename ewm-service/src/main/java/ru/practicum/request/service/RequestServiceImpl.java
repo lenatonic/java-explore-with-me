@@ -57,27 +57,17 @@ public class RequestServiceImpl implements RequestService {
         if (event.getState().equals(EventState.PENDING)) {
             throw new WrongEventDateException("Заявки не принимаются на ещё не опубликованное событие");
         }
-        List<ParticipationRequest> allRequests = requestRepository.findByEvent_IdAndStatus(eventId,
-                RequestStatus.CONFIRMED);
-        int count = allRequests.size();
-        if (!event.getParticipantLimit().equals(0) && count >= event.getParticipantLimit() ||
-                event.getParticipantLimit() != null && count >= event.getParticipantLimit()) {
+
+        if (event.getParticipantLimit() != 0 && event.getConfirmedRequests() >= event.getParticipantLimit()) {
             throw new WrongEventDateException("Лимит заявок превышен. Приём заявок приостановлен");
         }
-        if (event.getRequestModeration()) {
-            return RequestMapper.toParticipationRequestDto(requestRepository.save(ParticipationRequest.builder()
-//                    .created(LocalDateTime.now())
-                            .created(time)
-                    .event(event)
-                    .requester(user)
-                    .status(RequestStatus.PENDING).build()));
-        }
+
         return RequestMapper.toParticipationRequestDto(requestRepository.save(ParticipationRequest.builder()
-//                .created(LocalDateTime.now())
-                        .created(time)
+                .created(time)
                 .event(event)
                 .requester(user)
-                .status(RequestStatus.CONFIRMED).build()));
+                .status((event.getRequestModeration()) ? RequestStatus.CONFIRMED : RequestStatus.PENDING)
+                .build()));
     }
 
     @Override
@@ -112,7 +102,7 @@ public class RequestServiceImpl implements RequestService {
                                                                EventRequestStatusUpdateRequest statusUpdateRequest) {
         userRepository.findById(idUser).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Event event = eventRepository.findById(idEvent).orElseThrow(() -> new NotFoundException("Такого события не существует"));
-        List<ParticipationRequest> requestsForChange = requestRepository.findByIdIn(statusUpdateRequest.getRequestIds());
+        List<ParticipationRequest> requestsForChange = requestRepository.findAllById(statusUpdateRequest.getRequestIds());//findByIdIn(statusUpdateRequest.getRequestIds());
 
         List<ParticipationRequest> confirmedRequestsForAns = new ArrayList<>();
         List<ParticipationRequest> rejectedRequestsForAns = new ArrayList<>();
@@ -129,7 +119,7 @@ public class RequestServiceImpl implements RequestService {
         } else {
             if (event.getRequestModeration() == null || event.getRequestModeration().equals(false) || event.getParticipantLimit().equals(0)) {
                 return EventRequestStatusUpdateResult.builder()
-                        .confirmedRequests(requestRepository.findByIdIn(statusUpdateRequest.getRequestIds())
+                        .confirmedRequests(requestRepository.findAllById(statusUpdateRequest.getRequestIds())//findByIdIn(statusUpdateRequest.getRequestIds())
                                 .stream().map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
                         .rejectedRequests(new ArrayList<>()).build();
             }

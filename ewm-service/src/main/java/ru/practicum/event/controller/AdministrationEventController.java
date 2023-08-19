@@ -8,6 +8,7 @@ import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -23,11 +24,11 @@ public class AdministrationEventController {
 
     @GetMapping("/events")
     public List<EventFoolDto> findEventsForAdmin(
-            @RequestParam List<Long> users,
-            @RequestParam List<EventState> states,
-            @RequestParam List<Long> categories,
-            @RequestParam String rangeStart,
-            @RequestParam String rangeEnd,
+            @RequestParam(required = false) List<Long> users,
+            @RequestParam(required = false) List<EventState> states,
+            @RequestParam(required = false) List<Long> categories,
+            @RequestParam(required = false) String rangeStart,
+            @RequestParam(required = false) String rangeEnd,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size) {
         List<EventFoolDto> ans = eventService.findEventsForAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
@@ -37,7 +38,7 @@ public class AdministrationEventController {
 
     @PatchMapping("/events/{eventId}")
     public EventFoolDto updateEventForAdmin(@PathVariable Long eventId,
-                                            @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+                                            @RequestBody @Valid UpdateEventAdminRequest updateEventAdminRequest) {
         EventFoolDto ans = eventService.updateEventForAdmin(eventId, updateEventAdminRequest);
         log.info("Админ редактирует событие id ={}.", eventId);
         return ans;
