@@ -1,10 +1,12 @@
 package ru.practicum.event.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -197,7 +199,7 @@ public class EventServiceImpl implements EventService {
                 .ip(request.getRemoteAddr())
                 .timestamp(time.format(ofPattern(Patterns.DATE_PATTERN))).build();
         statsClient.addHit(endpointHitDto);
-//        addView(event);
+        addView(event);
         return EventMapper.toEventFoolDtoForUser(event);
     }
 
@@ -223,23 +225,25 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-//    private void addView(Event event) {
-//        var start = event.getCreatedOn().format(ofPattern(Patterns.DATE_PATTERN));
-//        var end = LocalDateTime.now().format(ofPattern(Patterns.DATE_PATTERN));
-//        var uris = List.of("/events/" + event.getId());
+    private void addView(Event event) {
+        String start = event.getCreatedOn().format(ofPattern(Patterns.DATE_PATTERN));
+        String end = LocalDateTime.now().format(ofPattern(Patterns.DATE_PATTERN));
+        List<String> uris = List.of("/events/" + event.getId());
+        ResponseEntity<Object> stats = statsClient.findStats(start, end, uris, false);
+        List<ViewStatsDto> s = (List<ViewStatsDto>) stats.getBody();
 //        List<ViewStatsDto> stats = (List<ViewStatsDto>) statsClient.findStats(start, end, uris, false);
-//        event.setViews(stats.get(0).getHits());
+        event.setViews(s.get(0).getHits());
 //        }
 
-    private void findAndSaveViews(List<Event> events) {
-        for (Event event : events) {
-            event.setViews(event.getViews() + 1);
-        }
-        eventRepository.saveAll(events);
-    }
-
-    private void findAndSaveView(Event event) {
-        event.setViews(event.getViews() + 1);
-        eventRepository.save(event);
+//    private void findAndSaveViews(List<Event> events) {
+//        for (Event event : events) {
+//            event.setViews(event.getViews() + 1);
+//        }
+//        eventRepository.saveAll(events);
+//    }
+//
+//    private void findAndSaveView(Event event) {
+//        event.setViews(event.getViews() + 1);
+//        eventRepository.save(event);
     }
 }
