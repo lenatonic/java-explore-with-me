@@ -9,6 +9,8 @@ import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.UpdateCompilationDto;
 import ru.practicum.compilation.service.CompilationService;
 
+import javax.validation.Valid;
+
 @RestController
 @Slf4j
 @AllArgsConstructor
@@ -18,7 +20,7 @@ public class AdministrationCompilationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto addCompilation(@RequestBody NewCompilationDto newCompilationDto) {
+    public CompilationDto addCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto) {
         CompilationDto ans = compilationService.addCompilation(newCompilationDto);
         log.info("Админ добавляет новую подборку событий");
         return ans;
@@ -33,7 +35,7 @@ public class AdministrationCompilationController {
 
     @PatchMapping("/{compId}")
     public CompilationDto updateCompilation(@PathVariable Long compId,
-                                            @RequestBody UpdateCompilationDto updateCompilationDto) {
+                                            @RequestBody @Valid UpdateCompilationDto updateCompilationDto) {
         CompilationDto ans = compilationService.updateCompilation(compId, updateCompilationDto);
         log.info("Админ внёс изменения в подборку событий id = {}", compId);
         return ans;

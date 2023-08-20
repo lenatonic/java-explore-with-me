@@ -29,8 +29,8 @@ public class AdministrationEventController {
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) String rangeStart,
             @RequestParam(required = false) String rangeEnd,
-            @RequestParam(defaultValue = "0") int from,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(required = false, defaultValue = "0") int from,
+            @RequestParam(required = false, defaultValue = "10") int size) {
         List<EventFoolDto> ans = eventService.findEventsForAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
         log.info("Получение списка событий по параметрам поиска");
         return ans;

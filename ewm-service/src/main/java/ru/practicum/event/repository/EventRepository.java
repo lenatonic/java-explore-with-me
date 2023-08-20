@@ -30,4 +30,21 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND e.eventDate < :end")
     List<Event> getFilterEvents(String text, List<Long> categories, Boolean paid,
                                 LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    List<Event> findAllByStateInAndCategory_IdInAndEventDateBetween(List<EventState> states, List<Long> categories,
+                                                                       LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    List<Event> findAllByCategory_IdInAndEventDateBetween(List<Long> categories, LocalDateTime start, LocalDateTime end,
+                                                           Pageable pageable);
+
+    List<Event> findAllByEventDateBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    List<Event> findAllByInitiator_IdInAndCategory_IdInAndEventDateBetween(List<Long> users, List<Long> categories,
+                                                                           LocalDateTime start, LocalDateTime end,
+                                                                           Pageable pageable);
+
+    List<Event> findAllByInitiator_IdInAndEventDateBetween(List<Long> users, LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    List<Event> findAllByInitiator_IdInAndStateInAndEventDateBetween(List<Long> users, List<EventState> states,
+                                                                     LocalDateTime start, LocalDateTime end, Pageable pageable);
 }

@@ -47,15 +47,15 @@ public class RequestServiceImpl implements RequestService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователя с таким id не существует"));
         if (requestRepository.existsByRequester_IdAndEvent_Id(userId, eventId)) {
-            throw new WrongEventDateException("Вы уже подали заявку на участие в этом событии.");
+            throw new DataIntegrityViolationException("Вы уже подали заявку на участие в этом событии.");
         }
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Такого события не существует"));
         if (event.getInitiator().getId().equals(userId)) {
-            throw new WrongEventDateException("Вы не можете подать заявку в событии, которое организовали");
+            throw new DataIntegrityViolationException("Вы не можете подать заявку в событии, которое организовали");
         }
         if (event.getState().equals(EventState.PENDING)) {
-            throw new WrongEventDateException("Заявки не принимаются на ещё не опубликованное событие");
+            throw new DataIntegrityViolationException("Заявки не принимаются на ещё не опубликованное событие");
         }
 
         if (event.getParticipantLimit() != 0 && event.getConfirmedRequests() >= event.getParticipantLimit()) {

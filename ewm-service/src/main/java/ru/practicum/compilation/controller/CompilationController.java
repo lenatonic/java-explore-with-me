@@ -16,8 +16,8 @@ public class CompilationController {
     private final CompilationService compilationService;
 
     @GetMapping
-    List<CompilationDto> findCompilations(@RequestParam(name = "from") int from,
-                                          @RequestParam(name = "size") int size) {
+    List<CompilationDto> findCompilations(@RequestParam(name = "from", defaultValue = "0") int from,
+                                          @RequestParam(name = "size", defaultValue = "10") int size) {
         List<CompilationDto> ans = compilationService.findCompilations(from, size);
         log.info("Получение списка подборок событий.");
         return ans;

@@ -53,15 +53,18 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventFoolDto addEvent(NewEventDto newEventDto, Long id) {
+        if(newEventDto.getEventDate() != null && !LocalDateTime
+                .parse(newEventDto.getEventDate(), ofPattern(Patterns.DATE_PATTERN))
+                .isAfter(LocalDateTime.now())) {
+            throw new NotValidException("Начало события не подходит.");
+        }
+
         if (LocalDateTime.parse(newEventDto.getEventDate(), ofPattern(Patterns.DATE_PATTERN))
                 .isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new WrongEventDateException("The date of Event is scheduled cannot be later");
+            throw new WrongEventDateException("Начало события не может быть раньше чем через " +
+                    "два часа с этого момента.");
         }
-        if (LocalDateTime.parse(newEventDto.getEventDate(), ofPattern(Patterns.DATE_PATTERN))
-                .isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new WrongEventDateException("The date of Event is scheduled cannot be earlier" +
-                    "than two hours from the current moment");
-        }
+
         if (newEventDto.getRequestModeration() == null) {
             newEventDto.setRequestModeration(true);
         }
@@ -104,8 +107,15 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFoolDto updateEvent(Long idUser, Long idEvent, UpdateEventUserRequest updateEventUserRequest) {
         Event event = eventRepository.findEventByIdAndInitiator_Id(idEvent, idUser);
-        if (event.getPublishedOn() != null)
+        if (event.getPublishedOn() != null) {
             throw new DataIntegrityViolationException("Событие уже опубликованно");
+        }
+
+        if(updateEventUserRequest.getEventDate() != null && !LocalDateTime
+                .parse(updateEventUserRequest.getEventDate(), ofPattern(Patterns.DATE_PATTERN))
+                .isAfter(LocalDateTime.now())) {
+            throw new NotValidException("Начало события не подходит.");
+        }
 
         if (updateEventUserRequest.getLocation() != null) {
             updateEventUserRequest.setLocation(locationRepository.save(updateEventUserRequest.getLocation()));
@@ -128,19 +138,60 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public List<EventFoolDto> findEventsForAdmin(List<Long> users, List<EventState> states, List<Long> categories,
                                                  String rangeStart, String rangeEnd, int from, int size) {
-        Pageable pageable = PageRequest.of(from / size, size);
+        Pageable pageable = PageRequest.of(from/size, size);
 
-        LocalDateTime start = LocalDateTime.parse(rangeStart, ofPattern(Patterns.DATE_PATTERN));
-        LocalDateTime end = LocalDateTime.parse(rangeEnd, ofPattern(Patterns.DATE_PATTERN));
+        LocalDateTime start = rangeStart == null ? LocalDateTime.now() :LocalDateTime
+                .parse(rangeStart, ofPattern(Patterns.DATE_PATTERN));
+        LocalDateTime end = rangeEnd == null ? LocalDateTime.now() : LocalDateTime
+                .parse(rangeEnd, ofPattern(Patterns.DATE_PATTERN));
 
-        return eventRepository.findByInitiator_IdInAndStateInAndCategory_IdInAndEventDateIsAfterAndEventDateIsBefore(users,
-                        states, categories, start, end, pageable).getContent()
-                .stream().map(EventMapper::toEventFoolDtoForUser).collect(Collectors.toList());
+        return findResponse(users, states, categories, start, end, pageable).stream()
+                .map(EventMapper::toEventFoolDtoForUser).collect(Collectors.toList());
+
+//        return eventRepository.findByInitiator_IdInAndStateInAndCategory_IdInAndEventDateIsAfterAndEventDateIsBefore(users,
+//                        states, categories, start, end, pageable).getContent()
+//                .stream().map(EventMapper::toEventFoolDtoForUser).collect(Collectors.toList());
+    }
+
+    private List<Event> findResponse(List<Long> users, List<EventState> states, List<Long> categories,
+                                     LocalDateTime start, LocalDateTime end, Pageable pageable) {
+        if(users == null && states != null && categories != null) {
+            return eventRepository.findAllByStateInAndCategory_IdInAndEventDateBetween(states, categories,
+                    start, end, pageable);
+        }
+        if(users == null && states == null && categories != null) {
+            return eventRepository.findAllByCategory_IdInAndEventDateBetween(categories,
+                    start, end, pageable);
+        }
+        if(users == null && states == null && categories == null) {
+            return eventRepository.findAllByEventDateBetween(start, end, pageable);
+        }
+        if(states == null && users != null && categories != null) {
+            return eventRepository.findAllByInitiator_IdInAndCategory_IdInAndEventDateBetween(users, categories,
+                    start, end, pageable);
+        }
+        if(states == null && users != null && categories == null) {
+            return eventRepository.findAllByInitiator_IdInAndEventDateBetween(users, start, end, pageable);
+        }
+        if(states != null && users != null && categories == null) {
+            return eventRepository.findAllByInitiator_IdInAndStateInAndEventDateBetween(users, states, start, end,
+                    pageable);
+        }
+        else {
+            return eventRepository.findByInitiator_IdInAndStateInAndCategory_IdInAndEventDateIsAfterAndEventDateIsBefore(users,
+                            states, categories, start, end, pageable).getContent();
+        }
     }
 
     @Override
     @Transactional
     public EventFoolDto updateEventForAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
+
+        if (updateEventAdminRequest.getEventDate() != null && LocalDateTime.parse(updateEventAdminRequest.getEventDate(), ofPattern(Patterns.DATE_PATTERN))
+                .isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new NotValidException("Дата события должна быть минимум на два часа позже текущего события.");
+        }
+
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Такого события не существует"));
         if(updateEventAdminRequest.getStateAction() == null) {
@@ -165,14 +216,15 @@ public class EventServiceImpl implements EventService {
                                                    String rangeStart, String rangeEnd, Boolean onlyAvailable,
                                                    EventsSort sort, Integer from, Integer size, HttpServletRequest request) {
 
+
         LocalDateTime start = rangeStart == null ? LocalDateTime.now() : LocalDateTime.
                 parse(rangeStart, ofPattern(Patterns.DATE_PATTERN));
         LocalDateTime end = rangeEnd == null ? LocalDateTime.now().plusYears(1) : LocalDateTime
                 .parse(rangeEnd, ofPattern(Patterns.DATE_PATTERN));
 
-//        if (start.isAfter(LocalDateTime.now()) || end.isAfter(LocalDateTime.now())) {
-//            throw new NotValidException("Временные рамки заданы не корректно");
-//        }
+        if (start.isBefore(LocalDateTime.now()) || end.isBefore(LocalDateTime.now())) {
+            throw new NotValidException("Временные рамки заданы не корректно");
+        }
 
         String filter = null;
         if (sort == null) {
