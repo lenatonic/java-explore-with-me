@@ -22,7 +22,7 @@ public interface EventService {
 
     List<EventShortDto> findEventsForPublic(String text, List<Long> categories, Boolean paid,
                                             String rangeStart, String rangeEnd, Boolean onlyAvailable,
-                                            EventsSort sort, Integer from, Integer size, HttpServletRequest request);
+                                            EventsSort sort, int from, int size, HttpServletRequest request);
 
     EventFoolDto findEventForPublic(Long id, HttpServletRequest request);
 }

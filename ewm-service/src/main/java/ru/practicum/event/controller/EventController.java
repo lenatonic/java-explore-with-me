@@ -38,7 +38,7 @@ public class EventController {
             newEventDto.setRequestModeration(true);
         }
         EventFoolDto ans = eventService.addEvent(newEventDto, id);
-        log.info("Пользователь id ={} создал новое событие id = ", id, ans.getId());
+        log.info("Пользователь id ={} создал новое событие id = {}", id, ans.getId());
         return ans;
     }
 
@@ -78,8 +78,8 @@ public class EventController {
 
     @PatchMapping("/{userId}/events/{eventId}/requests")
     public EventRequestStatusUpdateResult updateStatusRequests(@PathVariable(name = "userId") Long idUser,
-                                                                     @PathVariable(name = "eventId") Long idEvent,
-                                                                     @RequestBody EventRequestStatusUpdateRequest statusUpdateRequest) {
+                                                               @PathVariable(name = "eventId") Long idEvent,
+                                                               @RequestBody EventRequestStatusUpdateRequest statusUpdateRequest) {
         EventRequestStatusUpdateResult ans = requestService.updateStatusRequests(idUser, idEvent, statusUpdateRequest);
         log.info("Пользователь id = {} меняет статус заявок на событие id = {}.", idUser, idEvent);
         return ans;

@@ -23,7 +23,7 @@ public class PublicEventController {
     }
 
     @GetMapping
-    public List<EventShortDto> findEventsForPublic(@RequestParam(required = false)String text,
+    public List<EventShortDto> findEventsForPublic(@RequestParam(required = false) String text,
                                                    @RequestParam(required = false) List<Long> categories,
                                                    @RequestParam(required = false) Boolean paid,
                                                    @RequestParam(required = false) String rangeStart,

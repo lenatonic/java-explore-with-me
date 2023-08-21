@@ -3,7 +3,6 @@ package ru.practicum.error;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -82,12 +81,5 @@ public class ErrorHandler {
                 .message(e.getMessage())
                 .status(HttpStatus.CONFLICT.getReasonPhrase().toUpperCase())
                 .build();
-    }
-
-    static String findStackTrace(Throwable throwable) {
-        StringWriter out = new StringWriter();
-        throwable.printStackTrace(new PrintWriter(out));
-        String stackTrace = out.toString();
-        return stackTrace;
     }
 }

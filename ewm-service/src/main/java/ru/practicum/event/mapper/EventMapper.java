@@ -22,6 +22,7 @@ public class EventMapper {
                 .eventDate(LocalDateTime.parse(newEventDto.getEventDate(),
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .createdOn(LocalDateTime.now())
+                .confirmedRequests(0)
                 .description(newEventDto.getDescription())
                 .category(Category.builder().id(newEventDto.getCategory()).build())
                 .location(newEventDto.getLocation())
@@ -30,27 +31,6 @@ public class EventMapper {
                 .state(EventState.PENDING)
                 .requestModeration(newEventDto.getRequestModeration())
                 .title(newEventDto.getTitle())
-                .build();
-    }
-
-    public EventFoolDto toEventFoolDto(Event event) {
-        return EventFoolDto.builder()
-                .annotation(event.getAnnotation())
-                .eventDate(event.getEventDate().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .confirmedRequests(event.getConfirmedRequests())
-                .createdOn(LocalDateTime.now()
-                        .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .description(event.getDescription())
-                .category(CategoryDto.builder().id(event.getCategory().getId()).build())
-                .initiator(UserShortDto.builder().id(event.getInitiator().getId()).build())
-                .location(event.getLocation())
-                .paid(event.isPaid())
-                .publishedOn(event.getPublishedOn() == null ? null : event.getPublishedOn()
-                        .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .requestModeration(event.getRequestModeration())
-                .state(event.getState())
-                .title(event.getTitle())
-                .views(event.getViews())
                 .build();
     }
 
@@ -107,23 +87,6 @@ public class EventMapper {
                 .state(event.getState())
                 .title(event.getTitle())
                 .views(event.getViews())
-                .build();
-    }
-
-    public Event toEvent(UpdateEventUserRequest updateEventUserRequest) {
-        return Event.builder()
-                .annotation(updateEventUserRequest.getAnnotation())
-                .eventDate(LocalDateTime.parse(updateEventUserRequest.getEventDate(),
-                        DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .description(updateEventUserRequest.getDescription())
-                .category(Category.builder().id(updateEventUserRequest.getCategory()).build())
-                .location(updateEventUserRequest.getLocation())
-                .paid(updateEventUserRequest.getPaid())
-                .participantLimit(updateEventUserRequest.getParticipantLimit())
-                .requestModeration(updateEventUserRequest.getRequestModeration())
-                .state(updateEventUserRequest.getStateAction()
-                        .equals("CANCEL_REVIEW") ? EventState.CANCELED : EventState.PENDING)
-                .title(updateEventUserRequest.getTitle())
                 .build();
     }
 

@@ -25,7 +25,7 @@ public class AdministrationCategoryController {
     @PostMapping("/categories")
     public CategoryDto addCategory(@Valid @RequestBody CategoryDto categoryDto) {
         CategoryDto ans = categoryService.addCategory(categoryDto);
-        log.info ("Админ добавил категорию {}", categoryDto.getName());
+        log.info("Админ добавил категорию {}", categoryDto.getName());
         return ans;
     }
 

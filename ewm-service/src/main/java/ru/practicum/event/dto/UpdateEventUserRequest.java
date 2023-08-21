@@ -1,10 +1,8 @@
 package ru.practicum.event.dto;
 
 import lombok.*;
-import ru.practicum.event.model.Location;
+import ru.practicum.location.Location;
 
-import javax.validation.constraints.Future;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Setter
