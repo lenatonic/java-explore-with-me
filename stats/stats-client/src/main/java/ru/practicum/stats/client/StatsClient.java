@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.stats.dto.EndpointHitDto;
 
-import java.util.List;
 import java.util.Map;
+
 @Component
 public class StatsClient extends BaseClient {
 
@@ -25,11 +25,17 @@ public class StatsClient extends BaseClient {
         return post("/hit", endpointHitDto);
     }
 
-    public ResponseEntity<Object> findStats(String start, String end, List<String> uris, Boolean unique) {
+    public ResponseEntity<Object> findStats(String start, String end, String[] uris, Boolean unique) {
+        System.out.println(start);
+        System.out.println(end);
+        System.out.println(uris);
+        System.out.println(unique);
+
         Map<String, Object> parameters = Map.of(
                 "start", start,
-                "end", end);
-
-        return get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters, uris, unique);
+                "end", end,
+                "uris", uris,
+                "unique", unique);
+        return get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
@@ -24,7 +23,6 @@ import ru.practicum.location.LocationRepository;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.EndpointHitDto;
-import ru.practicum.stats.dto.ViewStatsDto;
 import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
@@ -34,9 +32,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Comparator.comparing;
@@ -292,7 +292,7 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     @Override
-    public EventFoolDto findEventForPublic(@PathVariable Long id, HttpServletRequest request) {
+    public EventFoolDto findEventForPublic(Long id, HttpServletRequest request) {
         LocalDateTime time = LocalDateTime.now();
         Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException(""));
         if (!event.getState().equals(EventState.PUBLISHED)) {
@@ -303,10 +303,30 @@ public class EventServiceImpl implements EventService {
                 .uri("/events/" + id)
                 .ip(request.getRemoteAddr())
                 .timestamp(time.format(ofPattern(Patterns.DATE_PATTERN))).build();
+
         statsClient.addHit(endpointHitDto);
-        //addViews(event);
-        //event.setViews(addViews(event));
+
+        event.setViews((long) findViews(event.getId()));
         eventRepository.save(event);
         return EventMapper.toEventFoolDtoForUser(event);
+    }
+
+    private int findViews(long eventId) {
+        String[] uri = {"/events/" + eventId};
+        String startDate = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String endDate = LocalDateTime.now().plusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        List<String> uris = new ArrayList<>();
+        Collections.addAll(uris, uri);
+        ResponseEntity<Object> stats = statsClient.findStats(startDate, endDate, uri, true);
+        int views = 0;
+        if (stats.hasBody()) {
+            List<HashMap<String, Object>> body = (List<HashMap<String, Object>>) stats.getBody();
+            if (body != null && !body.isEmpty()) {
+                HashMap<String, Object> map = body.get(0);
+                views = (int) map.get("hits");
+            }
+        }
+        System.out.println(views);
+        return views;
     }
 }
