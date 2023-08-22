@@ -2,6 +2,7 @@ package ru.practicum.stats.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats.service.StatsService;
@@ -20,6 +21,7 @@ public class StatsController {
     private final StatsService service;
 
     @PostMapping("/hit")
+    @ResponseStatus(HttpStatus.CREATED)
     public void addEndPointHit(@RequestBody @Valid EndpointHitDto endpointHitDto) {
         service.addEndPointHit(endpointHitDto);
     }
