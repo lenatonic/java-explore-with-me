@@ -20,7 +20,6 @@ import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.location.Location;
 import ru.practicum.location.LocationRepository;
-import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.user.mapper.UserMapper;
@@ -49,7 +48,6 @@ public class EventServiceImpl implements EventService {
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final RequestRepository requestRepository;
     private final StatsClient statsClient;
     private final EntityManager entityManager;
 
@@ -314,7 +312,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private int findViews(long eventId) {
-        String[] uri = {"/events" +"/" + eventId};
+        String[] uri = {"/events" + "/" + eventId};
         String startDate = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String endDate = LocalDateTime.now().plusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         List<String> uris = new ArrayList<>();

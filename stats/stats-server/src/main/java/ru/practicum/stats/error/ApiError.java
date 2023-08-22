@@ -1,14 +1,9 @@
 package ru.practicum.stats.error;
 
-import lombok.*;
-import org.springframework.http.HttpStatus;
+import lombok.Builder;
 
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Setter
-@Getter
 @Builder
 public class ApiError {
     List<String> errors;
@@ -16,7 +11,4 @@ public class ApiError {
     String reason;
     String status;
     String timestamp;
-
-    public <T> ApiError(HttpStatus status, String reason, String message, List<T> errors, String timestamp) {
-    }
 }
