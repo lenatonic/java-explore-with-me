@@ -38,7 +38,7 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
                                       @Param("uris") List<String> uris);
 
     @Query(value = "SELECT new ru.practicum.stats.model.ViewStats(" +
-            "eh.app as app, eh.uri as uri, COUNT(eh.ip) as hits) " +
+            "eh.app as app, eh.uri as uri, COUNT(DISTINCT eh.ip) as hits) " +
             "FROM EndpointHit eh " +
             "WHERE eh.timestamp between :start AND :end " +
             "GROUP BY eh.app, eh.uri " +

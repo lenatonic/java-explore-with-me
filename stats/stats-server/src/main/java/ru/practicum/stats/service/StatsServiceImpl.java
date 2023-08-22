@@ -39,7 +39,7 @@ public class StatsServiceImpl implements StatsService {
 
         if (LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                 .isBefore(LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))) {
-            throw new NotValidException("Временные рамки заданы неверно");
+            throw new NotValidException();
         }
         LocalDateTime beginning = LocalDateTime.parse(encrypt(start), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LocalDateTime finish = LocalDateTime.parse(encrypt(end), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

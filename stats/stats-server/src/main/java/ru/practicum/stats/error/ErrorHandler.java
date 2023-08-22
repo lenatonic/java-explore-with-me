@@ -20,13 +20,13 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleNotValidException(NotValidException e) {
-        log.info("400{}", e.getMessage());
+        log.info("Временные рамки заданы неверно");
         return ApiError.builder()
                 .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
-                .reason("Not found")
+                .reason("Bad request")
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .message(e.getMessage())
-                .status(HttpStatus.NOT_FOUND.getReasonPhrase().toUpperCase())
+                .status(HttpStatus.BAD_REQUEST.getReasonPhrase().toUpperCase())
                 .build();
     }
 }
