@@ -38,8 +38,8 @@ public class CompilationMapper {
                 .events(events)
                 .pinned(updateCompilationDto
                         .getPinned() == null ? compilation.getPinned() : updateCompilationDto.getPinned())
-                .title(updateCompilationDto.
-                        getTitle() == null ? compilation.getTitle() : updateCompilationDto.getTitle())
+                .title(updateCompilationDto
+                        .getTitle() == null ? compilation.getTitle() : updateCompilationDto.getTitle())
                 .build();
     }
 }

@@ -160,8 +160,8 @@ public class RequestServiceImpl implements RequestService {
         int plus = event.getConfirmedRequests();
         event.setConfirmedRequests(plus + confirmedRequestsForUp.size());
         EventRequestStatusUpdateResult.builder()
-                .confirmedRequests(confirmedRequestsForUp.stream().
-                        map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
+                .confirmedRequests(confirmedRequestsForUp.stream()
+                        .map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
                 .rejectedRequests(rejectedRequestsForUp.stream()
                         .map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList())).build();
 

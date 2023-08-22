@@ -45,8 +45,8 @@ public class CompilationServiceImpl implements CompilationService {
         List<Event> events = updateCompilationDto.getEvents() == null ?
                 new ArrayList<>() : eventRepository.findAllById(updateCompilationDto.getEvents());
 
-        return CompilationMapper.toCompilationDto(compilationRepository.save(CompilationMapper.
-                toCompilationForUpdate(compilation, updateCompilationDto, events)));
+        return CompilationMapper.toCompilationDto(compilationRepository.save(CompilationMapper
+                .toCompilationForUpdate(compilation, updateCompilationDto, events)));
     }
 
     @Override
