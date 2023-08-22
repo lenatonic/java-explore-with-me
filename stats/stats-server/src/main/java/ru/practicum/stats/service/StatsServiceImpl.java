@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class StatsServiceImpl implements StatsService {
-    private static final DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final EndpointHitRepository hitRepository;
 
