@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.stats.dto.ViewStatsDto;
+import ru.practicum.stats.error.exceptions.NotValidException;
 import ru.practicum.stats.mapper.StatsMapper;
 import ru.practicum.stats.repository.EndpointHitRepository;
 
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class StatsServiceImpl implements StatsService {
+    private static final DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final EndpointHitRepository hitRepository;
 
@@ -35,19 +37,22 @@ public class StatsServiceImpl implements StatsService {
     @Transactional(readOnly = true)
     public List<ViewStatsDto> findStats(String start, String end, List<String> uris, Boolean unique) {
 
+        if (LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                .isBefore(LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))) {
+            throw new NotValidException("Временные рамки заданы неверно");
+        }
         LocalDateTime beginning = LocalDateTime.parse(encrypt(start), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LocalDateTime finish = LocalDateTime.parse(encrypt(end), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         if (unique) {
             return hitRepository.findStatsUniqueIp(beginning, finish, uris)
                     .stream().map(StatsMapper::toViewStatsDto).collect(Collectors.toList());
-
         }
         if (uris == null || uris.isEmpty()) {
-            return hitRepository.findStatsWithoutUri(beginning, finish)
+            return hitRepository.findStatsWithoutUri(LocalDateTime.parse(start, format), LocalDateTime.parse(end, format))
                     .stream().map(StatsMapper::toViewStatsDto).collect(Collectors.toList());
         }
-        return hitRepository.findStats(beginning, finish, uris)
+        return hitRepository.findStats(LocalDateTime.parse(start, format), LocalDateTime.parse(end, format), uris)
                 .stream().map(StatsMapper::toViewStatsDto).collect(Collectors.toList());
     }
 

@@ -302,7 +302,7 @@ public class EventServiceImpl implements EventService {
         }
         EndpointHitDto endpointHitDto = EndpointHitDto.builder()
                 .app("main-service")
-                .uri("/events/" + id)
+                .uri("/events" + "/" + id)
                 .ip(request.getRemoteAddr())
                 .timestamp(time.format(ofPattern(Patterns.DATE_PATTERN))).build();
 
@@ -314,7 +314,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private int findViews(long eventId) {
-        String[] uri = {"/events/" + eventId};
+        String[] uri = {"/events" +"/" + eventId};
         String startDate = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String endDate = LocalDateTime.now().plusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         List<String> uris = new ArrayList<>();
@@ -335,7 +335,7 @@ public class EventServiceImpl implements EventService {
     private void addHitsForEvents(List<Event> events, HttpServletRequest request) {
         EndpointHitDto endpointHitDto = EndpointHitDto.builder()
                 .app("main-service")
-                .uri("/events/")
+                .uri("/events")
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now().format(ofPattern(Patterns.DATE_PATTERN))).build();
         statsClient.addHit(endpointHitDto);
@@ -346,7 +346,7 @@ public class EventServiceImpl implements EventService {
         for (Event event : events) {
             EndpointHitDto endpointHitDto = EndpointHitDto.builder()
                     .app("main-service")
-                    .uri("/events/" + event.getId())
+                    .uri("/events" + "/" + event.getId())
                     .ip(request.getRemoteAddr())
                     .timestamp(time.format(ofPattern(Patterns.DATE_PATTERN))).build();
             statsClient.addHit(endpointHitDto);
