@@ -264,7 +264,7 @@ public class EventServiceImpl implements EventService {
 
         query.select(root).where(criteria).orderBy(builder.asc(root.get("eventDate")));
 
-        var events = entityManager.createQuery(query)
+        List<Event> events = entityManager.createQuery(query)
                 .setFirstResult(from)
                 .setMaxResults(size)
                 .getResultList();
@@ -287,6 +287,8 @@ public class EventServiceImpl implements EventService {
         if (events.size() == 0) {
             return new ArrayList<>();
         }
+        addHitsForEvents(events, request);
+        addViews(events);
         return events.stream().map(EventMapper::toEventShortDto).collect(toList());
     }
 
@@ -328,5 +330,34 @@ public class EventServiceImpl implements EventService {
         }
         System.out.println(views);
         return views;
+    }
+
+    private void addHitsForEvents(List<Event> events, HttpServletRequest request) {
+        EndpointHitDto endpointHitDto = EndpointHitDto.builder()
+                .app("main-service")
+                .uri("/events/")
+                .ip(request.getRemoteAddr())
+                .timestamp(LocalDateTime.now().format(ofPattern(Patterns.DATE_PATTERN))).build();
+        statsClient.addHit(endpointHitDto);
+        addHitsForListEvents(events, request, LocalDateTime.now());
+    }
+
+    private void addHitsForListEvents(List<Event> events, HttpServletRequest request, LocalDateTime time) {
+        for (Event event : events) {
+            EndpointHitDto endpointHitDto = EndpointHitDto.builder()
+                    .app("main-service")
+                    .uri("/events/" + event.getId())
+                    .ip(request.getRemoteAddr())
+                    .timestamp(time.format(ofPattern(Patterns.DATE_PATTERN))).build();
+            statsClient.addHit(endpointHitDto);
+        }
+    }
+
+    private void addViews(List<Event> events) {
+        for (Event event : events) {
+            Long views = Long.valueOf(findViews(event.getId()));
+            event.setViews(views);
+            eventRepository.save(event);
+        }
     }
 }
