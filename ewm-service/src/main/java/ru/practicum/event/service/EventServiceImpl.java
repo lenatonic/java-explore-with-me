@@ -254,6 +254,7 @@ public class EventServiceImpl implements EventService {
             if (body != null && !body.isEmpty()) {
                 System.out.println(body.get(0));
             }
+            assert body != null;
             HashMap<String, Object> map = body.get(0);
             views = (int) map.get("hits");
         }
