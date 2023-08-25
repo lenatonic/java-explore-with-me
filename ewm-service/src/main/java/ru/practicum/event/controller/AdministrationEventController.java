@@ -3,8 +3,8 @@ package ru.practicum.event.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.event.dto.EventFoolDto;
-import ru.practicum.event.dto.UpdateEventAdminRequest;
+import ru.practicum.event.dto.EventFullDto;
+import ru.practicum.event.dto.UpdateEventAdminRequestDto;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
 
@@ -23,7 +23,7 @@ public class AdministrationEventController {
     }
 
     @GetMapping("/events")
-    public List<EventFoolDto> findEventsForAdmin(
+    public List<EventFullDto> findEventsForAdmin(
             @RequestParam(required = false) List<Long> users,
             @RequestParam(required = false) List<EventState> states,
             @RequestParam(required = false) List<Long> categories,
@@ -31,15 +31,15 @@ public class AdministrationEventController {
             @RequestParam(required = false) String rangeEnd,
             @RequestParam(required = false, defaultValue = "0") int from,
             @RequestParam(required = false, defaultValue = "10") int size) {
-        List<EventFoolDto> ans = eventService.findEventsForAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        List<EventFullDto> ans = eventService.findEventsForAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
         log.info("Получение списка событий по параметрам поиска");
         return ans;
     }
 
     @PatchMapping("/events/{eventId}")
-    public EventFoolDto updateEventForAdmin(@PathVariable Long eventId,
-                                            @RequestBody @Valid UpdateEventAdminRequest updateEventAdminRequest) {
-        EventFoolDto ans = eventService.updateEventForAdmin(eventId, updateEventAdminRequest);
+    public EventFullDto updateEventForAdmin(@PathVariable Long eventId,
+                                            @RequestBody @Valid UpdateEventAdminRequestDto updateEventAdminRequestDto) {
+        EventFullDto ans = eventService.updateEventForAdmin(eventId, updateEventAdminRequestDto);
         log.info("Админ редактирует событие id ={}.", eventId);
         return ans;
     }

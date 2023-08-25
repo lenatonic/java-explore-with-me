@@ -30,6 +30,7 @@ services:
       - "8080:8080"
     depends_on:
       - ewm-db
+      - stats-server
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres

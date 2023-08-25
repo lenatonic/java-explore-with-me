@@ -7,22 +7,22 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface EventService {
-    EventFoolDto addEvent(NewEventDto newEventDto, Long id);
+    EventFullDto addEvent(NewEventDto newEventDto, Long id);
 
     List<EventShortDto> findEvents(Long id, int from, int size);
 
-    EventFoolDto findEvent(Long idUser, Long idEvent);
+    EventFullDto findEvent(Long idUser, Long idEvent);
 
-    EventFoolDto updateEvent(Long idUser, Long idEvent, UpdateEventUserRequest updateEventUserRequest);
+    EventFullDto updateEvent(Long idUser, Long idEvent, UpdateEventUserRequestDto updateEventUserRequestDto);
 
-    List<EventFoolDto> findEventsForAdmin(List<Long> users, List<EventState> states, List<Long> categories,
+    List<EventFullDto> findEventsForAdmin(List<Long> users, List<EventState> states, List<Long> categories,
                                           String rangeStart, String rangeEnd, int from, int size);
 
-    EventFoolDto updateEventForAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
+    EventFullDto updateEventForAdmin(Long eventId, UpdateEventAdminRequestDto updateEventAdminRequestDto);
 
     List<EventShortDto> findEventsForPublic(String text, List<Long> categories, Boolean paid,
                                             String rangeStart, String rangeEnd, Boolean onlyAvailable,
-                                            EventsSort sort, int from, int size, HttpServletRequest request);
+                                            EventsSort sort, int from, int size, String remoteAddress);
 
-    EventFoolDto findEventForPublic(Long id, HttpServletRequest request);
+    EventFullDto findEventForPublic(Long id, String remoteAddress);
 }

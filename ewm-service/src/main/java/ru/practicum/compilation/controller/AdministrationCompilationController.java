@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
-import ru.practicum.compilation.dto.UpdateCompilationDto;
 import ru.practicum.compilation.service.CompilationService;
 
 import javax.validation.Valid;
@@ -35,7 +34,7 @@ public class AdministrationCompilationController {
 
     @PatchMapping("/{compId}")
     public CompilationDto updateCompilation(@PathVariable Long compId,
-                                            @RequestBody @Valid UpdateCompilationDto updateCompilationDto) {
+                                            @RequestBody NewCompilationDto updateCompilationDto) {
         CompilationDto ans = compilationService.updateCompilation(compId, updateCompilationDto);
         log.info("Админ внёс изменения в подборку событий id = {}", compId);
         return ans;

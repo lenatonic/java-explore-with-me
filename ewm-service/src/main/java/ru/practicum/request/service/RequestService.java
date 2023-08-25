@@ -1,7 +1,7 @@
 package ru.practicum.request.service;
 
-import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
-import ru.practicum.request.dto.EventRequestStatusUpdateResult;
+import ru.practicum.request.dto.EventRequestStatusUpdateRequestDto;
+import ru.practicum.request.dto.EventRequestStatusUpdateResultDto;
 import ru.practicum.request.dto.ParticipationRequestDto;
 
 import java.time.LocalDateTime;
@@ -16,6 +16,6 @@ public interface RequestService {
 
     List<ParticipationRequestDto> findRequestsByUsersEvent(Long idEvent, Long idUser);
 
-    EventRequestStatusUpdateResult updateStatusRequests(Long idUser, Long idEvent,
-                                                        EventRequestStatusUpdateRequest statusUpdateRequest);
+    EventRequestStatusUpdateResultDto updateStatusRequests(Long idUser, Long idEvent,
+                                                           EventRequestStatusUpdateRequestDto statusUpdateRequest);
 }

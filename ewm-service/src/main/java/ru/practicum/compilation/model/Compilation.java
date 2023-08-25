@@ -4,7 +4,8 @@ import lombok.*;
 import ru.practicum.event.model.Event;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -22,7 +23,7 @@ public class Compilation {
     @JoinTable(name = "events_compilations",
             joinColumns = @JoinColumn(name = "compilation_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id"))
-    private List<Event> events;
+    private Set<Event> events = new HashSet<>();
 
     private Boolean pinned;
 

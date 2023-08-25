@@ -7,6 +7,7 @@ import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
+import ru.practicum.location.LocationMapper;
 import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.util.Patterns;
@@ -25,7 +26,7 @@ public class EventMapper {
                 .confirmedRequests(0)
                 .description(newEventDto.getDescription())
                 .category(Category.builder().id(newEventDto.getCategory()).build())
-                .location(newEventDto.getLocation())
+                .location(LocationMapper.toLocation(newEventDto.getLocation()))
                 .paid(newEventDto.isPaid())
                 .participantLimit(newEventDto.getParticipantLimit())
                 .state(EventState.PENDING)
@@ -34,8 +35,8 @@ public class EventMapper {
                 .build();
     }
 
-    public EventFoolDto toEventFoolDtoForSave(Event event) {
-        return EventFoolDto.builder()
+    public EventFullDto toEventFoolDtoForSave(Event event) {
+        return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
                 .eventDate(event.getEventDate().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
@@ -68,8 +69,8 @@ public class EventMapper {
                 .build();
     }
 
-    public EventFoolDto toEventFoolDtoForUser(Event event) {
-        return EventFoolDto.builder()
+    public EventFullDto toEventFoolDtoForUser(Event event) {
+        return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
                 .eventDate(event.getEventDate().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
@@ -90,49 +91,49 @@ public class EventMapper {
                 .build();
     }
 
-    public Event toUpdatedEvent(UpdateEventUserRequest updateEventUserRequest, Event event) {
+    public Event toUpdatedEvent(UpdateEventUserRequestDto updateEventUserRequestDto, Event event) {
         return Event.builder()
                 .id(event.getId())
-                .annotation(updateEventUserRequest.getAnnotation() != null ? updateEventUserRequest.getAnnotation() : event.getAnnotation())
-                .category(updateEventUserRequest.getCategory() != null ? Category.builder()
-                        .id(updateEventUserRequest.getCategory()).build() : event.getCategory())
+                .annotation(updateEventUserRequestDto.getAnnotation() != null ? updateEventUserRequestDto.getAnnotation() : event.getAnnotation())
+                .category(updateEventUserRequestDto.getCategory() != null ? Category.builder()
+                        .id(updateEventUserRequestDto.getCategory()).build() : event.getCategory())
                 .confirmedRequests(event.getConfirmedRequests())
                 .createdOn(event.getCreatedOn())
-                .description(updateEventUserRequest.getDescription() != null ? updateEventUserRequest.getDescription() : event.getDescription())
-                .eventDate(updateEventUserRequest.getEventDate() != null ? LocalDateTime.parse(updateEventUserRequest.getEventDate(),
+                .description(updateEventUserRequestDto.getDescription() != null ? updateEventUserRequestDto.getDescription() : event.getDescription())
+                .eventDate(updateEventUserRequestDto.getEventDate() != null ? LocalDateTime.parse(updateEventUserRequestDto.getEventDate(),
                         DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)) : event.getEventDate())
                 .initiator(event.getInitiator())
-                .location(updateEventUserRequest.getLocation() != null ? updateEventUserRequest.getLocation() : event.getLocation())
-                .paid(updateEventUserRequest.getPaid() != null ? updateEventUserRequest.getPaid() : event.isPaid())
-                .participantLimit(updateEventUserRequest.getParticipantLimit() != 0 ? updateEventUserRequest.getParticipantLimit() : event.getParticipantLimit())
+                .location(updateEventUserRequestDto.getLocation() != null ? updateEventUserRequestDto.getLocation() : event.getLocation())
+                .paid(updateEventUserRequestDto.getPaid() != null ? updateEventUserRequestDto.getPaid() : event.isPaid())
+                .participantLimit(updateEventUserRequestDto.getParticipantLimit() != 0 ? updateEventUserRequestDto.getParticipantLimit() : event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn())
                 .state(event.getState())
-                .requestModeration(updateEventUserRequest.getRequestModeration() == null ? event.getRequestModeration() : updateEventUserRequest.getRequestModeration())
-                .title(updateEventUserRequest.getTitle() != null ? updateEventUserRequest.getTitle() : event.getTitle())
+                .requestModeration(updateEventUserRequestDto.getRequestModeration() == null ? event.getRequestModeration() : updateEventUserRequestDto.getRequestModeration())
+                .title(updateEventUserRequestDto.getTitle() != null ? updateEventUserRequestDto.getTitle() : event.getTitle())
                 .views(event.getViews())
                 .build();
 
     }
 
-    public Event toUpdatedEventForAdmin(UpdateEventAdminRequest updateEventAdminRequest, Event event) {
+    public Event toUpdatedEventForAdmin(UpdateEventAdminRequestDto updateEventAdminRequestDto, Event event) {
         return Event.builder()
                 .id(event.getId())
-                .annotation(updateEventAdminRequest.getAnnotation() != null ? updateEventAdminRequest.getAnnotation() : event.getAnnotation())
-                .category(updateEventAdminRequest.getCategory() != null ? Category.builder()
-                        .id(updateEventAdminRequest.getCategory()).build() : event.getCategory())
+                .annotation(updateEventAdminRequestDto.getAnnotation() != null ? updateEventAdminRequestDto.getAnnotation() : event.getAnnotation())
+                .category(updateEventAdminRequestDto.getCategory() != null ? Category.builder()
+                        .id(updateEventAdminRequestDto.getCategory()).build() : event.getCategory())
                 .confirmedRequests(event.getConfirmedRequests())
                 .createdOn(event.getCreatedOn())
-                .description(updateEventAdminRequest.getDescription() != null ? updateEventAdminRequest.getDescription() : event.getDescription())
-                .eventDate(updateEventAdminRequest.getEventDate() != null ? LocalDateTime.parse(updateEventAdminRequest.getEventDate(),
+                .description(updateEventAdminRequestDto.getDescription() != null ? updateEventAdminRequestDto.getDescription() : event.getDescription())
+                .eventDate(updateEventAdminRequestDto.getEventDate() != null ? LocalDateTime.parse(updateEventAdminRequestDto.getEventDate(),
                         DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)) : event.getEventDate())
                 .initiator(event.getInitiator())
-                .location(updateEventAdminRequest.getLocation() == null ? event.getLocation() : updateEventAdminRequest.getLocation())
-                .paid(updateEventAdminRequest.getPaid() == null ? event.isPaid() : updateEventAdminRequest.getPaid())
-                .participantLimit(updateEventAdminRequest.getParticipantLimit() != 0 ? updateEventAdminRequest.getParticipantLimit() : event.getParticipantLimit())
+                .location(updateEventAdminRequestDto.getLocation() == null ? event.getLocation() : updateEventAdminRequestDto.getLocation())
+                .paid(updateEventAdminRequestDto.getPaid() == null ? event.isPaid() : updateEventAdminRequestDto.getPaid())
+                .participantLimit(updateEventAdminRequestDto.getParticipantLimit() != 0 ? updateEventAdminRequestDto.getParticipantLimit() : event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn())
                 .state(event.getState())
-                .requestModeration(updateEventAdminRequest.getRequestModeration() == null ? event.getRequestModeration() : updateEventAdminRequest.getRequestModeration())
-                .title(updateEventAdminRequest.getTitle() != null ? updateEventAdminRequest.getTitle() : event.getTitle())
+                .requestModeration(updateEventAdminRequestDto.getRequestModeration() == null ? event.getRequestModeration() : updateEventAdminRequestDto.getRequestModeration())
+                .title(updateEventAdminRequestDto.getTitle() != null ? updateEventAdminRequestDto.getTitle() : event.getTitle())
                 .views(event.getViews())
                 .build();
     }

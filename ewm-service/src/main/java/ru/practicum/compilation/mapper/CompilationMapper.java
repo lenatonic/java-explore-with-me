@@ -3,17 +3,16 @@ package ru.practicum.compilation.mapper;
 import lombok.experimental.UtilityClass;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
-import ru.practicum.compilation.dto.UpdateCompilationDto;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @UtilityClass
 public class CompilationMapper {
-    public Compilation toCompilation(NewCompilationDto newCompilationDto, List<Event> events) {
+    public Compilation toCompilation(NewCompilationDto newCompilationDto, HashSet<Event> events) {
         return Compilation.builder()
                 .events(events)
                 .pinned(newCompilationDto.getPinned() == null ? false : newCompilationDto.getPinned())
@@ -25,14 +24,14 @@ public class CompilationMapper {
         return CompilationDto.builder()
                 .id(compilation.getId())
                 .events(compilation.getEvents().stream()
-                        .map(EventMapper::toEventShortDto).collect(Collectors.toList()))
+                        .map(EventMapper::toEventShortDto).collect(Collectors.toSet()))
                 .title(compilation.getTitle())
                 .pinned(compilation.getPinned())
                 .build();
     }
 
     public Compilation toCompilationForUpdate(Compilation compilation,
-                                              UpdateCompilationDto updateCompilationDto, List<Event> events) {
+                                              NewCompilationDto updateCompilationDto, HashSet<Event> events) {
         return Compilation.builder()
                 .id(compilation.getId())
                 .events(events)

@@ -3,6 +3,7 @@ package ru.practicum.error;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,6 +12,7 @@ import ru.practicum.error.exceptions.NotValidException;
 import ru.practicum.error.exceptions.WrongEventDateException;
 import ru.practicum.util.Patterns;
 
+import javax.validation.ConstraintViolationException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
@@ -25,20 +27,20 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleNotValidException(NotValidException e) {
-        log.info("400{}", e.getMessage());
+    public ApiError handleNotValidException(NotValidException exception) {
+        log.info("400{}", exception);
         return ApiError.builder()
-                .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
-                .reason("Not found")
+                .errors(Collections.singletonList(Arrays.toString(exception.getStackTrace())))
+                .reason("bad request")
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .message(e.getMessage())
-                .status(HttpStatus.NOT_FOUND.getReasonPhrase().toUpperCase())
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST.getReasonPhrase().toUpperCase())
                 .build();
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ApiError handleException(Exception exception, HttpStatus status) {
+    public ApiError handleException(Throwable exception, HttpStatus status) {
         log.error("error", exception);
         StringWriter out = new StringWriter();
         exception.printStackTrace(new PrintWriter(out));
@@ -80,6 +82,30 @@ public class ErrorHandler {
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
                 .message(e.getMessage())
                 .status(HttpStatus.CONFLICT.getReasonPhrase().toUpperCase())
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleConstraintViolationException(final ConstraintViolationException e) {
+        return ApiError.builder()
+                .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
+                .reason("Not valid")
+                .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .message(e.getMessage())
+                .status(HttpStatus.BAD_REQUEST.getReasonPhrase().toUpperCase())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler
+    public ApiError handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        return ApiError.builder()
+                .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
+                .reason("bad request")
+                .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .message(e.getMessage())
+                .status(HttpStatus.BAD_REQUEST.getReasonPhrase().toUpperCase())
                 .build();
     }
 }

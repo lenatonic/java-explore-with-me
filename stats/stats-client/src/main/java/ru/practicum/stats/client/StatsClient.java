@@ -26,10 +26,6 @@ public class StatsClient extends BaseClient {
     }
 
     public ResponseEntity<Object> findStats(String start, String end, String[] uris, Boolean unique) {
-        System.out.println(start);
-        System.out.println(end);
-        System.out.println(uris);
-        System.out.println(unique);
 
         Map<String, Object> parameters = Map.of(
                 "start", start,

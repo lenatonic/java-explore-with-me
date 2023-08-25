@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -29,7 +30,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> findUsers(List<Long> ids, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
         List<UserDto> ans = new ArrayList<>();

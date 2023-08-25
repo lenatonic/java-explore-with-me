@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EventRequestStatusUpdateRequest {
+public class EventRequestStatusUpdateRequestDto {
     private List<Long> requestIds;
     private RequestUpdateStatus status;
 }

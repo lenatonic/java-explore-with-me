@@ -2,8 +2,9 @@ package ru.practicum.event.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.event.dto.EventFoolDto;
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.EventsSort;
 import ru.practicum.event.service.EventService;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/events")
+@Transactional(readOnly = true)
 public class PublicEventController {
     private final EventService eventService;
 
@@ -34,14 +36,14 @@ public class PublicEventController {
                                                    @RequestParam(defaultValue = "10") Integer size,
                                                    HttpServletRequest request) {
         List<EventShortDto> ans = eventService.findEventsForPublic(text, categories, paid, rangeStart, rangeEnd,
-                onlyAvailable, sort, from, size, request);
+                onlyAvailable, sort, from, size, request.getRemoteAddr());
         log.info("Получение списка событий по публичному поиску.");
         return ans;
     }
 
     @GetMapping("/{id}")
-    public EventFoolDto findEventForPublic(@PathVariable Long id, HttpServletRequest request) {
-        EventFoolDto ans = eventService.findEventForPublic(id, request);
+    public EventFullDto findEventForPublic(@PathVariable Long id, HttpServletRequest request) {
+        EventFullDto ans = eventService.findEventForPublic(id, request.getRemoteAddr());
         log.info("Получение cобытия id = {} по публичному поиску.", id);
         return ans;
     }

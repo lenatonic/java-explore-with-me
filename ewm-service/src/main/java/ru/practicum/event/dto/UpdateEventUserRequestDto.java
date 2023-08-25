@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UpdateEventUserRequest {
+public class UpdateEventUserRequestDto {
 
     @Size(min = 20, max = 2000)
     private String annotation;

@@ -42,13 +42,12 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     @Override
     public void deleteCategory(Long id) {
-        if (eventRepository.existsByCategory_Id(id)) {
+        if (eventRepository.existsByCategoryId(id)) {
             throw new DataIntegrityViolationException("Нельзя удалить категорию. Она связана с событием.");
         }
         categoryRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<CategoryDto> findCategories(int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
@@ -60,7 +59,6 @@ public class CategoryServiceImpl implements CategoryService {
         return ans;
     }
 
-    @Transactional(readOnly = true)
     @Override
     public CategoryDto findCategoryById(Long id) {
         return CategoryMapper.toCategoryDto(categoryRepository.findById(id)
