@@ -216,7 +216,7 @@ public class EventServiceImpl implements EventService {
         if (events.size() == 0) {
             return new ArrayList<>();
         }
-        addHitsForEvents(events, remoteAddress);
+        addHitsForEvents(remoteAddress);
         events = addViews(events);
         return events.stream().map(EventMapper::toEventShortDto).collect(toList());
     }
@@ -260,7 +260,7 @@ public class EventServiceImpl implements EventService {
         return views;
     }
 
-    private void addHitsForEvents(List<Event> events, String remoteAddress) {
+    private void addHitsForEvents(String remoteAddress) {
         EndpointHitDto endpointHitDto = EndpointHitDto.builder()
                 .app("main-service")
                 .uri("/events")
@@ -272,7 +272,6 @@ public class EventServiceImpl implements EventService {
     private List<Event> addViews(List<Event> events) {
         String startDate = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String endDate = LocalDateTime.now().plusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        List<String> uris = new ArrayList<>();
         String[] uri = new String[events.size()];
         for (int index = 0; index < events.size(); index++) {
             uri[index] = "/events" + "/" + events.get(index).getId();
