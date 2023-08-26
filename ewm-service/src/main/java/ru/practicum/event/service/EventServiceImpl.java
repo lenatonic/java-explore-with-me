@@ -245,8 +245,6 @@ public class EventServiceImpl implements EventService {
         int views = 0;
         if (stats.hasBody()) {
             List<HashMap<String, Object>> body = (List<HashMap<String, Object>>) stats.getBody();
-            if (body != null && !body.isEmpty()) {
-            }
             assert body != null;
             HashMap<String, Object> map = body.get(0);
             views = (int) map.get("hits");
