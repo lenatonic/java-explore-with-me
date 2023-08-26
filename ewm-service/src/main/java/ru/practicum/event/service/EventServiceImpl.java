@@ -21,7 +21,6 @@ import ru.practicum.location.LocationMapper;
 import ru.practicum.location.LocationRepository;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.EndpointHitDto;
-import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 import ru.practicum.util.Patterns;
@@ -64,17 +63,15 @@ public class EventServiceImpl implements EventService {
         if (newEventDto.getRequestModeration() == null) {
             newEventDto.setRequestModeration(true);
         }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Неверные данные id пользователя"));
+
         Event event = EventMapper.toEvent(newEventDto);
-        event.setInitiator(User.builder().id(id).build());
+        event.setInitiator(user);
         Location location = locationRepository.save(LocationMapper.toLocation(newEventDto.getLocation()));
         event.setLocation(location);
 
         EventFullDto ans = EventMapper.toEventFoolDtoForSave(eventRepository.save(event));
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Неверные данные id пользователя"));
-        ans.setInitiator(UserMapper.toUserShortDto(user));
-
         ans.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
         return ans;
     }
@@ -82,10 +79,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> findEvents(Long id, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
-        List<EventShortDto> ans = new ArrayList<>();
-        ans.addAll(eventRepository.findEventByInitiatorId(id, pageable)
-                .getContent().stream().map(EventMapper::toEventShortDto).collect(toList()));
-        return ans;
+        return eventRepository.findEventByInitiatorId(id, pageable)
+                .getContent().stream().map(EventMapper::toEventShortDto).collect(toList());
     }
 
     @Override
@@ -237,7 +232,6 @@ public class EventServiceImpl implements EventService {
         statsClient.addHit(endpointHitDto);
 
         event.setViews((long) findViews(event.getId()));
-        eventRepository.save(event);
         return EventMapper.toEventFoolDtoForUser(event);
     }
 
@@ -252,7 +246,6 @@ public class EventServiceImpl implements EventService {
         if (stats.hasBody()) {
             List<HashMap<String, Object>> body = (List<HashMap<String, Object>>) stats.getBody();
             if (body != null && !body.isEmpty()) {
-                System.out.println(body.get(0));
             }
             assert body != null;
             HashMap<String, Object> map = body.get(0);
@@ -278,7 +271,6 @@ public class EventServiceImpl implements EventService {
             uri[index] = "/events" + "/" + events.get(index).getId();
         }
         ResponseEntity<Object> stats = statsClient.findStats(startDate, endDate, uri, true);
-        System.out.println(stats);
 
         if (stats.hasBody()) {
             List<HashMap<String, Object>> body = (List<HashMap<String, Object>>) stats.getBody();

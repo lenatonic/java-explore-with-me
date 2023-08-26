@@ -3,6 +3,7 @@ package ru.practicum.event.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
@@ -10,10 +11,13 @@ import ru.practicum.event.dto.EventsSort;
 import ru.practicum.event.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
 @Slf4j
+@Validated
 @RequestMapping("/events")
 @Transactional(readOnly = true)
 public class PublicEventController {
@@ -32,8 +36,8 @@ public class PublicEventController {
                                                    @RequestParam(required = false) String rangeEnd,
                                                    @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                                    @RequestParam(required = false) EventsSort sort,
-                                                   @RequestParam(defaultValue = "0") Integer from,
-                                                   @RequestParam(defaultValue = "10") Integer size,
+                                                   @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                   @RequestParam(defaultValue = "10") @Positive Integer size,
                                                    HttpServletRequest request) {
         List<EventShortDto> ans = eventService.findEventsForPublic(text, categories, paid, rangeStart, rangeEnd,
                 onlyAvailable, sort, from, size, request.getRemoteAddr());

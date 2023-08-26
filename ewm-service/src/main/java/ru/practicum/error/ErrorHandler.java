@@ -28,7 +28,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleNotValidException(NotValidException exception) {
-        log.info("400{}", exception);
+        log.error("error", exception);
         return ApiError.builder()
                 .errors(Collections.singletonList(Arrays.toString(exception.getStackTrace())))
                 .reason("bad request")

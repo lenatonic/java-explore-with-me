@@ -1,6 +1,9 @@
 package ru.practicum.event.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.event.model.EventState;
 import ru.practicum.location.Location;
@@ -10,22 +13,26 @@ import ru.practicum.user.dto.UserShortDto;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class EventFullDto {
-    private Long id;
-    private String annotation;
-    private CategoryDto category;
-    private int confirmedRequests;
+public class EventFullDto extends EventShortDto {
     private String createdOn;
     private String description;
-    private String eventDate;
-    private UserShortDto initiator;
     private Location location;
-    private boolean paid;
     private int participantLimit;
     private String publishedOn;
     private boolean requestModeration;
     private EventState state;
-    private String title;
-    private Long views;
+
+    public EventFullDto(Long id, String annotation, CategoryDto category, int confirmedRequests, String eventDate,
+                        UserShortDto initiator, boolean paid, String title, Long views, String createdOn,
+                        String description, Location location, int participantLimit, String publishedOn,
+                        boolean requestModeration, EventState state) {
+        super(id, annotation, category, confirmedRequests, eventDate, initiator, paid, title, views);
+        this.createdOn = createdOn;
+        this.description = description;
+        this.location = location;
+        this.participantLimit = participantLimit;
+        this.publishedOn = publishedOn;
+        this.requestModeration = requestModeration;
+        this.state = state;
+    }
 }

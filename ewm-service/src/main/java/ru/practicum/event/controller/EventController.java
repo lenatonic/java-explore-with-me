@@ -3,6 +3,7 @@ package ru.practicum.event.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
@@ -15,10 +16,13 @@ import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.service.RequestService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
 @Slf4j
+@Validated
 @RequestMapping("/users")
 public class EventController {
     private final EventService eventService;
@@ -44,8 +48,8 @@ public class EventController {
 
     @GetMapping("/{userId}/events")
     public List<EventShortDto> findEvents(@PathVariable(name = "userId") Long id,
-                                          @RequestParam(defaultValue = "0") int from,
-                                          @RequestParam(defaultValue = "10") int size) {
+                                          @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                          @RequestParam(defaultValue = "10") @Positive int size) {
         List<EventShortDto> ans = eventService.findEvents(id, from, size);
         log.info("Список событий пользователя id {}", id);
         return ans;

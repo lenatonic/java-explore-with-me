@@ -36,23 +36,13 @@ public class EventMapper {
     }
 
     public EventFullDto toEventFoolDtoForSave(Event event) {
-        return EventFullDto.builder()
-                .id(event.getId())
-                .annotation(event.getAnnotation())
-                .eventDate(event.getEventDate().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .confirmedRequests(event.getConfirmedRequests())
-                .createdOn(event.getCreatedOn().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .description(event.getDescription())
-                .category(CategoryDto.builder().id(event.getCategory().getId()).build())
-                .initiator(UserShortDto.builder().id(event.getInitiator().getId()).build())
-                .participantLimit(event.getParticipantLimit())
-                .location(event.getLocation())
-                .paid(event.isPaid())
-                .requestModeration(event.getRequestModeration())
-                .state(event.getState())
-                .title(event.getTitle())
-                .views(event.getViews())
-                .build();
+        return new EventFullDto(event.getId(), event.getAnnotation(), CategoryDto.builder()
+                .id(event.getCategory().getId())
+                .build(), event.getConfirmedRequests(), event.getEventDate()
+                .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)), UserShortDto.builder()
+                .id(event.getInitiator().getId()).build(), event.isPaid(), event.getTitle(), event.getViews(),
+                event.getCreatedOn().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)), event.getDescription(),
+                event.getLocation(), event.getParticipantLimit(), null, event.getRequestModeration(), event.getState());
     }
 
     public EventShortDto toEventShortDto(Event event) {
@@ -70,25 +60,13 @@ public class EventMapper {
     }
 
     public EventFullDto toEventFoolDtoForUser(Event event) {
-        return EventFullDto.builder()
-                .id(event.getId())
-                .annotation(event.getAnnotation())
-                .eventDate(event.getEventDate().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .confirmedRequests(event.getConfirmedRequests())
-                .createdOn(event.getCreatedOn().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .description(event.getDescription())
-                .category(CategoryMapper.toCategoryDto(event.getCategory()))
-                .initiator(UserMapper.toUserShortDto(event.getInitiator()))
-                .location(event.getLocation())
-                .paid(event.isPaid())
-                .participantLimit(event.getParticipantLimit())
-                .publishedOn(event.getPublishedOn() == null ? null : event.getPublishedOn()
-                        .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
-                .requestModeration(event.getRequestModeration())
-                .state(event.getState())
-                .title(event.getTitle())
-                .views(event.getViews())
-                .build();
+        return new EventFullDto(event.getId(), event.getAnnotation(), CategoryMapper.toCategoryDto(event.getCategory()),
+                event.getConfirmedRequests(), event.getEventDate().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)),
+                UserMapper.toUserShortDto(event.getInitiator()), event.isPaid(), event.getTitle(), event.getViews(),
+                event.getCreatedOn().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)), event.getDescription(),
+                event.getLocation(), event.getParticipantLimit(), event.getPublishedOn() == null ? null : event.getPublishedOn()
+                .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)),
+                event.getRequestModeration(), event.getState());
     }
 
     public Event toUpdatedEvent(UpdateEventUserRequestDto updateEventUserRequestDto, Event event) {

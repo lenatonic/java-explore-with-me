@@ -43,14 +43,13 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     @Override
     public ParticipationRequestDto createRequest(Long userId, Long eventId, LocalDateTime time) {
-        eventRepository.lockById(eventId);
+        Event event = eventRepository.lockById(eventId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователя с таким id не существует"));
         if (requestRepository.existsByRequester_IdAndEvent_Id(userId, eventId)) {
             throw new DataIntegrityViolationException("Вы уже подали заявку на участие в этом событии.");
         }
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Такого события не существует"));
+
         if (event.getInitiator().getId().equals(userId)) {
             throw new DataIntegrityViolationException("Вы не можете подать заявку в событии, которое организовали");
         }
@@ -115,10 +114,13 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public EventRequestStatusUpdateResultDto updateStatusRequests(Long idUser, Long idEvent,
                                                                   EventRequestStatusUpdateRequestDto statusUpdateRequest) {
-        eventRepository.lockById(idEvent);
-        userRepository.findById(idUser).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        Event event = eventRepository.findById(idEvent).orElseThrow(() -> new NotFoundException("Такого события не существует"));
-        List<ParticipationRequest> requestsForChange = requestRepository.findAllById(statusUpdateRequest.getRequestIds());
+        Event event = eventRepository.lockById(idEvent);
+        if (!userRepository.existsById(idUser)) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        List<ParticipationRequest> requestsForChange = requestRepository
+                .findAllById(statusUpdateRequest.getRequestIds());
 
 
         List<ParticipationRequest> confirmedRequestsForAns = new ArrayList<>();
@@ -137,7 +139,8 @@ public class RequestServiceImpl implements RequestService {
                 rejectedRequestsForUp.add(request);
             }
         } else {
-            if (event.getRequestModeration() == null || event.getRequestModeration().equals(false) || event.getParticipantLimit().equals(0)) {
+            if (event.getRequestModeration() == null || event.getRequestModeration()
+                    .equals(false) || event.getParticipantLimit().equals(0)) {
                 return EventRequestStatusUpdateResultDto.builder()
                         .confirmedRequests(requestRepository.findAllById(statusUpdateRequest.getRequestIds())
                                 .stream().map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList()))
@@ -161,8 +164,6 @@ public class RequestServiceImpl implements RequestService {
                 }
             }
         }
-        requestRepository.saveAll(confirmedRequestsForUp);
-        requestRepository.saveAll(rejectedRequestsForUp);
         int plus = event.getConfirmedRequests();
         event.setConfirmedRequests(plus + confirmedRequestsForUp.size());
 

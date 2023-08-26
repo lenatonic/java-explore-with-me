@@ -9,6 +9,8 @@ import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.service.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -33,8 +35,8 @@ public class AdministrationUsersController {
 
     @GetMapping("/users")
     public List<UserDto> findUsers(@RequestParam(required = false) List<Long> ids,
-                                   @RequestParam(defaultValue = "0") int from,
-                                   @RequestParam(defaultValue = "10") int size) {
+                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                   @RequestParam(defaultValue = "10") @Positive int size) {
         List<UserDto> ans = userService.findUsers(ids, from, size);
         log.info("Админ получает ответ на запрос списка пользователей.");
         return ans;
