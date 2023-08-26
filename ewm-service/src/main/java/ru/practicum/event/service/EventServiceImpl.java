@@ -271,20 +271,17 @@ public class EventServiceImpl implements EventService {
             uri[index] = "/events" + "/" + events.get(index).getId();
         }
         ResponseEntity<Object> stats = statsClient.findStats(startDate, endDate, uri, true);
-
         if (stats.hasBody()) {
             List<HashMap<String, Object>> body = (List<HashMap<String, Object>>) stats.getBody();
-            if (body != null && !body.isEmpty()) {
-                for (Event event : events) {
-                    for (int index = 0; index < body.size(); index++) {
-                        String u = (String) body.get(index).get("uri");
-                        String s = u.replace("/events/", "");
-                        Long f = Long.valueOf(s);
-                        if (event.getId().equals(f)) {
-                            event.setViews(Long.valueOf(String.valueOf(body.get(index).get("hits"))));
-                        }
-                    }
-                }
+            HashMap<Long, Long> map = new HashMap<>();
+            for (int index = 0; index < body.size(); index++) {
+                String u = (String) body.get(index).get("uri");
+                String s = u.replace("/events/", "");
+                Long f = Long.valueOf(s);
+                map.put(f, Long.valueOf(String.valueOf(body.get(index).get("hits"))));
+            }
+            for (Event event : events) {
+                event.setViews(map.get(event.getId()));
             }
         }
         return events;
