@@ -1,9 +1,12 @@
 package ru.practicum.util;
 
 public interface ValidationGroup {
-    interface AddCompilation{};
+    interface AddCompilation {
+    }
 
-    interface UpCompilation{};
+    interface UpCompilation {
+    }
 
-    interface AddEvent{};
+    interface AddEvent {
+    }
 }
