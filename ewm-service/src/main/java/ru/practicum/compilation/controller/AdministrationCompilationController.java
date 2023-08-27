@@ -3,21 +3,25 @@ package ru.practicum.compilation.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.service.CompilationService;
+import ru.practicum.util.ValidationGroup;
 
 import javax.validation.Valid;
 
 @RestController
 @Slf4j
 @AllArgsConstructor
+@Validated
 @RequestMapping("/admin/compilations")
 public class AdministrationCompilationController {
     private final CompilationService compilationService;
 
     @PostMapping
+    @Validated({ValidationGroup.AddCompilation.class})
     @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto addCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto) {
         CompilationDto ans = compilationService.addCompilation(newCompilationDto);
@@ -33,8 +37,9 @@ public class AdministrationCompilationController {
     }
 
     @PatchMapping("/{compId}")
+    @Validated({ValidationGroup.UpCompilation.class})
     public CompilationDto updateCompilation(@PathVariable Long compId,
-                                            @RequestBody NewCompilationDto updateCompilationDto) {
+                                            @RequestBody @Valid NewCompilationDto updateCompilationDto) {
         CompilationDto ans = compilationService.updateCompilation(compId, updateCompilationDto);
         log.info("Админ внёс изменения в подборку событий id = {}", compId);
         return ans;

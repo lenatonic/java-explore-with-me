@@ -1,9 +1,6 @@
 package ru.practicum.event.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.event.model.EventState;
 import ru.practicum.location.Location;
@@ -22,6 +19,7 @@ public class EventFullDto extends EventShortDto {
     private boolean requestModeration;
     private EventState state;
 
+    @Builder
     public EventFullDto(Long id, String annotation, CategoryDto category, int confirmedRequests, String eventDate,
                         UserShortDto initiator, boolean paid, String title, Long views, String createdOn,
                         String description, Location location, int participantLimit, String publishedOn,

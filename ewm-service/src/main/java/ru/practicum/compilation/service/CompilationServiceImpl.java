@@ -11,7 +11,6 @@ import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.compilation.repository.CompilationRepository;
 import ru.practicum.error.exceptions.NotFoundException;
-import ru.practicum.error.exceptions.NotValidException;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 
@@ -48,9 +47,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public CompilationDto updateCompilation(Long compId, NewCompilationDto updateCompilationDto) {
-        if (updateCompilationDto.getTitle() != null && (1 > updateCompilationDto.getTitle().length() || 50 < updateCompilationDto.getTitle().length())) {
-            throw new NotValidException("Длина названия подборки событий не соответствует параметрам min = 1, max = 50");
-        }
+
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Нет данных подборки событий с id = " + compId + "."));
 

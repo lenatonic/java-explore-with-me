@@ -27,7 +27,7 @@ public class EventMapper {
                 .description(newEventDto.getDescription())
                 .category(Category.builder().id(newEventDto.getCategory()).build())
                 .location(LocationMapper.toLocation(newEventDto.getLocation()))
-                .paid(newEventDto.isPaid())
+                .paid(newEventDto.getPaid() == null ? false : newEventDto.getPaid())
                 .participantLimit(newEventDto.getParticipantLimit())
                 .state(EventState.PENDING)
                 .requestModeration(newEventDto.getRequestModeration())
@@ -36,17 +36,31 @@ public class EventMapper {
     }
 
     public EventFullDto toEventFoolDtoForSave(Event event) {
-        return new EventFullDto(event.getId(), event.getAnnotation(), CategoryDto.builder()
-                .id(event.getCategory().getId())
-                .build(), event.getConfirmedRequests(), event.getEventDate()
-                .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)), UserShortDto.builder()
-                .id(event.getInitiator().getId()).build(), event.isPaid(), event.getTitle(), event.getViews(),
-                event.getCreatedOn().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)), event.getDescription(),
-                event.getLocation(), event.getParticipantLimit(), null, event.getRequestModeration(), event.getState());
+        return EventFullDto.builder()
+                .id(event.getId())
+                .annotation(event.getAnnotation())
+                .category(CategoryDto.builder()
+                        .id(event.getCategory().getId())
+                        .build())
+                .confirmedRequests(event.getConfirmedRequests())
+                .eventDate(event.getEventDate()
+                        .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .initiator(UserShortDto.builder()
+                        .id(event.getInitiator().getId()).build())
+                .paid(event.isPaid())
+                .title(event.getTitle())
+                .views(event.getViews())
+                .createdOn(event.getCreatedOn().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .description(event.getDescription())
+                .location(event.getLocation())
+                .participantLimit(event.getParticipantLimit())
+                .requestModeration(event.getRequestModeration())
+                .state(event.getState())
+                .build();
     }
 
     public EventShortDto toEventShortDto(Event event) {
-        return EventShortDto.builder()
+        return EventFullDto.builder()
                 .eventDate(event.getEventDate().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.toCategoryDto(event.getCategory()))
@@ -60,13 +74,25 @@ public class EventMapper {
     }
 
     public EventFullDto toEventFoolDtoForUser(Event event) {
-        return new EventFullDto(event.getId(), event.getAnnotation(), CategoryMapper.toCategoryDto(event.getCategory()),
-                event.getConfirmedRequests(), event.getEventDate().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)),
-                UserMapper.toUserShortDto(event.getInitiator()), event.isPaid(), event.getTitle(), event.getViews(),
-                event.getCreatedOn().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)), event.getDescription(),
-                event.getLocation(), event.getParticipantLimit(), event.getPublishedOn() == null ? null : event.getPublishedOn()
-                .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)),
-                event.getRequestModeration(), event.getState());
+        return EventFullDto.builder()
+                .id(event.getId())
+                .annotation(event.getAnnotation())
+                .category(CategoryMapper.toCategoryDto(event.getCategory()))
+                .confirmedRequests(event.getConfirmedRequests())
+                .eventDate(event.getEventDate().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .initiator(UserMapper.toUserShortDto(event.getInitiator()))
+                .paid(event.isPaid())
+                .title(event.getTitle())
+                .views(event.getViews())
+                .createdOn(event.getCreatedOn().format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .description(event.getDescription())
+                .location(event.getLocation())
+                .participantLimit(event.getParticipantLimit())
+                .publishedOn(event.getPublishedOn() == null ? null : event.getPublishedOn()
+                        .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)))
+                .requestModeration(event.getRequestModeration())
+                .state(event.getState())
+                .build();
     }
 
     public Event toUpdatedEvent(UpdateEventUserRequestDto updateEventUserRequestDto, Event event) {
@@ -81,7 +107,7 @@ public class EventMapper {
                 .eventDate(updateEventUserRequestDto.getEventDate() != null ? LocalDateTime.parse(updateEventUserRequestDto.getEventDate(),
                         DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)) : event.getEventDate())
                 .initiator(event.getInitiator())
-                .location(updateEventUserRequestDto.getLocation() != null ? updateEventUserRequestDto.getLocation() : event.getLocation())
+                .location(updateEventUserRequestDto.getLocation() != null ? LocationMapper.toLocation(updateEventUserRequestDto.getLocation()) : event.getLocation())
                 .paid(updateEventUserRequestDto.getPaid() != null ? updateEventUserRequestDto.getPaid() : event.isPaid())
                 .participantLimit(updateEventUserRequestDto.getParticipantLimit() != 0 ? updateEventUserRequestDto.getParticipantLimit() : event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn())
@@ -105,7 +131,7 @@ public class EventMapper {
                 .eventDate(updateEventAdminRequestDto.getEventDate() != null ? LocalDateTime.parse(updateEventAdminRequestDto.getEventDate(),
                         DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN)) : event.getEventDate())
                 .initiator(event.getInitiator())
-                .location(updateEventAdminRequestDto.getLocation() == null ? event.getLocation() : updateEventAdminRequestDto.getLocation())
+                .location(updateEventAdminRequestDto.getLocation() == null ? event.getLocation() : LocationMapper.toLocation(updateEventAdminRequestDto.getLocation()))
                 .paid(updateEventAdminRequestDto.getPaid() == null ? event.isPaid() : updateEventAdminRequestDto.getPaid())
                 .participantLimit(updateEventAdminRequestDto.getParticipantLimit() != 0 ? updateEventAdminRequestDto.getParticipantLimit() : event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn())

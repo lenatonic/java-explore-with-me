@@ -1,36 +1,14 @@
 package ru.practicum.event.dto;
 
-import lombok.*;
-import ru.practicum.location.Location;
-
-import javax.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class UpdateEventAdminRequestDto {
-    @Size(min = 20, max = 2000)
-    private String annotation;
-
-    private Long category;
-
-    @Size(min = 20, max = 7000)
-    private String description;
-
-    private String eventDate;
-
-    private Location location;
-
-    private Boolean paid;
-
-    private int participantLimit;
-
-    private Boolean requestModeration;
-
+public class UpdateEventAdminRequestDto extends NewEventDto {
     private StateActionForAdmin stateAction;
-
-    @Size(min = 3, max = 120)
-    private String title;
 }

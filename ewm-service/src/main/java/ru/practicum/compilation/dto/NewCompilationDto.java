@@ -1,6 +1,7 @@
 package ru.practicum.compilation.dto;
 
 import lombok.*;
+import ru.practicum.util.ValidationGroup;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -16,7 +17,7 @@ public class NewCompilationDto {
 
     private Boolean pinned;
 
-    @NotBlank
+    @NotBlank(groups = ValidationGroup.AddCompilation.class)
     @Size(min = 1, max = 50)
     private String title;
 }
