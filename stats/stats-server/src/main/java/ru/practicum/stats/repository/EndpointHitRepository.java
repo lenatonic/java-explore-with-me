@@ -12,11 +12,12 @@ import java.util.List;
 
 @Repository
 public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> {
+
     @Query(value = "SELECT new ru.practicum.stats.model.ViewStats(" +
             "eh.app as app, eh.uri as uri, COUNT(eh.ip) as hits) " +
             "FROM EndpointHit eh " +
             "WHERE eh.timestamp between :start AND :end " +
-            "AND uri in ( :uris ) " +
+            "AND eh.uri in :uris " +
             "GROUP BY eh.app, eh.uri " +
             "ORDER BY hits DESC")
     List<ViewStats> findStats(@Param("start") LocalDateTime start,
