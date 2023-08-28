@@ -14,7 +14,7 @@ import ru.practicum.request.dto.EventRequestStatusUpdateRequestDto;
 import ru.practicum.request.dto.EventRequestStatusUpdateResultDto;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.service.RequestService;
-import ru.practicum.util.ValidationGroup;
+import ru.practicum.validation.ValidationGroup;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;

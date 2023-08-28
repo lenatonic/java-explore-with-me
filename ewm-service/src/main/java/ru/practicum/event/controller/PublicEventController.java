@@ -2,7 +2,6 @@ package ru.practicum.event.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
@@ -19,7 +18,6 @@ import java.util.List;
 @Slf4j
 @Validated
 @RequestMapping("/events")
-@Transactional(readOnly = true)
 public class PublicEventController {
     private final EventService eventService;
 

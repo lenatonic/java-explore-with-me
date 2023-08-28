@@ -52,6 +52,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFoundException(NotFoundException e) {
+        log.error("error", e);
         return ApiError.builder()
                 .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
                 .reason("Not found")
@@ -64,6 +65,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        log.error("error", e);
         return ApiError.builder()
                 .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
                 .reason("conflict")
@@ -76,6 +78,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiError handleWrongEventDateException(WrongEventDateException e) {
+        log.error("error", e);
         return ApiError.builder()
                 .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
                 .reason("conflict")
@@ -88,6 +91,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleConstraintViolationException(final ConstraintViolationException e) {
+        log.error("error", e);
         return ApiError.builder()
                 .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
                 .reason("Not valid")
@@ -100,6 +104,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
     public ApiError handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        log.error("error", e);
         return ApiError.builder()
                 .errors(Collections.singletonList(Arrays.toString(e.getStackTrace())))
                 .reason("bad request")

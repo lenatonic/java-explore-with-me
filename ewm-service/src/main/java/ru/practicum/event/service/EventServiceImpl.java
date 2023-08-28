@@ -233,23 +233,28 @@ public class EventServiceImpl implements EventService {
 
         statsClient.addHit(endpointHitDto);
 
-        event.setViews((long) findViews(event.getId()));
+        event.setViews(findViews(event.getId()));
         return EventMapper.toEventFoolDtoForUser(event);
     }
 
-    private int findViews(long eventId) {
+    private long findViews(long eventId) {
         String[] uri = {"/events" + "/" + eventId};
         String startDate = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String endDate = LocalDateTime.now().plusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         List<String> uris = new ArrayList<>();
         Collections.addAll(uris, uri);
         ResponseEntity<Object> stats = statsClient.findStats(startDate, endDate, uri, true);
-        int views = 0;
+        long views = 0;
         if (stats.hasBody()) {
             List<HashMap<String, Object>> body = (List<HashMap<String, Object>>) stats.getBody();
-            assert body != null;
-            HashMap<String, Object> map = body.get(0);
-            views = (int) map.get("hits");
+            HashMap<Long, Long> map = new HashMap<>();
+            for (int index = 0; index < body.size(); index++) {
+                String u = (String) body.get(index).get("uri");
+                String s = u.replace("/events/", "");
+                Long f = Long.valueOf(s);
+                map.put(f, Long.valueOf(String.valueOf(body.get(index).get("hits"))));
+            }
+            views = map.get(eventId);
         }
         return views;
     }
