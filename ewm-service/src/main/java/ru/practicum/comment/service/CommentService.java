@@ -10,11 +10,9 @@ public interface CommentService {
 
     List<CommentDto> findCommentsUser(Long userId);
 
-//    List<CommentDto> findAllCommentsUserByEvent(Long userId, Long eventId);
-
     CommentDto findComment(Long userId, Long commentId);
 
     void deleteComment(Long userId, Long commentId);
 
-    CommentDto upComment(Long userId, Long commentId, NewCommentDto commentDto);
+    CommentDto updateComment(Long userId, Long commentId, NewCommentDto commentDto);
 }

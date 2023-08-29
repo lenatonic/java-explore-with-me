@@ -32,7 +32,7 @@ public class CommentController {
     public CommentDto commentDto(@PathVariable Long userId,
                                  @PathVariable Long commentId,
                                  @RequestBody @Valid NewCommentDto commentDto) {
-        CommentDto ans = commentService.upComment(userId, commentId, commentDto);
+        CommentDto ans = commentService.updateComment(userId, commentId, commentDto);
         log.info("Пользователь id = {}, отредактировал комментарий id = {}.", userId, commentId);
         return ans;
     }
