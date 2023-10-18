@@ -30,5 +30,4 @@ public class CommentMapper {
                 .dateCreate(comment.getDateCreate()
                         .format(DateTimeFormatter.ofPattern(Patterns.DATE_PATTERN))).build();
     }
-
 }
